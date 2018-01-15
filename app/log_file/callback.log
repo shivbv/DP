@@ -1,0 +1,18 @@
+# Logfile created on 2018-01-09 15:48:20 -0500 by logger.rb/56815
+I, [2018-01-09T16:43:07.121839 #14523]  INFO -- : *****https://www.google.com***successfull*****
+I, [2018-01-09T16:44:01.476963 #14556]  INFO -- : *****https://www.google.com***successfull*****
+I, [2018-01-09T16:44:42.486746 #14589]  INFO -- : *****https://www.google.com***successfull*****
+I, [2018-01-09T16:48:37.266050 #14684]  INFO -- : *****https://www.google.com***successfull*****
+E, [2018-01-09T17:30:11.123416 #15108] ERROR -- : *****https://www.google.com***undefined local variable or method `logger' for REQ:Module*****
+I, [2018-01-09T17:31:07.851424 #15149]  INFO -- : *****https://www.google.com***successfull*****
+I, [2018-01-09T17:32:51.762612 #15201]  INFO -- : *****https://www.google.com***successfull*****
+I, [2018-01-09T17:33:38.775514 #15216]  INFO -- : *****https://www.google.com***successfull*****
+I, [2018-01-09T18:54:10.969685 #4612]  INFO -- : *****https://www.google.com***successfull*****
+I, [2018-01-09T18:56:54.097369 #4640]  INFO -- : *****https://www.google.com***successfull*****
+I, [2018-01-09T19:09:48.014305 #4976]  INFO -- : *****https://www.google.com***successfull*****
+I, [2018-01-09T19:14:22.761525 #5099]  INFO -- : *****https://www.google.com***successfull*****
+I, [2018-01-09T19:14:51.556503 #5099]  INFO -- : *****https://www.google.com***successfull*****
+I, [2018-01-09T19:15:18.075621 #5121]  INFO -- : *****https://www.google.com***successfull*****
+E, [2018-01-09T20:27:55.339572 #7075] ERROR -- : *****www.google.com***absolute URL needed (not www.google.com)*****
+I, [2018-01-09T20:29:02.584306 #7075]  INFO -- : *****https://www.google.com***successfull*****
+I, [2018-01-09T20:32:45.820714 #7240]  INFO -- : *****https://google.com***successfull*****
