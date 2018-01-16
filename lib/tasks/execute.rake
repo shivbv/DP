@@ -1,6 +1,5 @@
 require 'resque/tasks'
 task :Executer => :environment do
-	#debugger
 	entity_ids = ScrapEntity.notexecuted.ids
 	ids_array = entity_ids.each_slice(4).to_a
 	Resque.enqueue(Executer, ids_array[0])

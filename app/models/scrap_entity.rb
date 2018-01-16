@@ -8,6 +8,8 @@ class ScrapEntity < ApplicationRecord
 	scope :similarweb, -> { where(:category => Category::SIMILARWEB)}
 	scope :trafficestimate, -> { where(:category => Category::TRAFFICESTIMATE)}
 	scope :scanbacklinks, -> { where(:category => Category::SCANBACKLINKS)}
+	scope :twitter, -> { where(:category => Category::TWITTER)}
+							
 	module Status
 		NOTEXECUTED = 0
 		EXECUTED = 1
@@ -20,6 +22,7 @@ class ScrapEntity < ApplicationRecord
 		SIMILARWEB = 1
 		TRAFFICESTIMATE = 2
 		SCANBACKLINKS = 3
+		TWITTER = 4
 	end
 
 	def logger
@@ -47,7 +50,6 @@ class ScrapEntity < ApplicationRecord
 
 	def self.batch_create(urls, params, category, status = Status::NOTEXECUTED)
 		update_array = []
-		debugger
 		urls.each { |url|
 			data = "('#{url}', '#{params.to_yaml}', #{category}, #{status}, '#{Time.now.getutc}', '#{Time.now.getutc}')"
 			update_array << data

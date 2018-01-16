@@ -8,7 +8,6 @@ class Executer
 		s_entities.each { |s_entity|
 			begin
 				logger = s_entity.logger
-				debugger
 				url = s_entity.url
 				params = s_entity.params
 				headers = params[:headers] || {}
