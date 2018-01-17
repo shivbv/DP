@@ -76,12 +76,12 @@ class Parser
 			res = get_response(s_entity)
 			if res != nil
 				website  = res.css('.ProfileHeaderCard-url span a.u-textUserColor')[0] != nil ?
-									 res.css('.ProfileHeaderCard-url span a.u-textUserColor')[0]['title'] : "not found"
-				geography = res.css('.ProfileHeaderCard-location span')[1] != nil ?
-										res.css('.ProfileHeaderCard-location span')[1].text.strip : "Not Found"
-				follower_count = res.search('span.ProfileNav-value')[2] != nil ? res.search('span.ProfileNav-value')[2].text : "Not Found"
-				puts "#{website}  #{geography}  #{follower_count} "
-				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
+					res.css('.ProfileHeaderCard-url span a.u-textUserColor')[0]['title'] : "not found"
+					geography = res.css('.ProfileHeaderCard-location span')[1] != nil ?
+					res.css('.ProfileHeaderCard-location span')[1].text.strip : "Not Found"
+					follower_count = res.search('span.ProfileNav-value')[2] != nil ? res.search('span.ProfileNav-value')[2].text : "Not Found"
+					puts "#{website}  #{geography}  #{follower_count} "
+					s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
 				logger.info "PARSEDSUCCESSFULLY :"
 			else
 				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
@@ -103,7 +103,7 @@ class Parser
 					puts value2
 				else
 					puts [value1, value2]
-        end
+				end
 				logger.info "PARSEDSUCCESSFULLY :"
 				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
 			rescue => e
@@ -111,6 +111,29 @@ class Parser
 				logger.error "PARSERFAILED : #{e.message}"
 			end
 		}
+	end
+
+	def self.article_details
+		scrap_entities = ScrapEntity.executed.article_details
+		scrap_entities.each { |s_entity|
+			logger = s_entity.logger
+			res = get_response(s_entity)
+			if res != nil
+				article_title = res.at('meta[property="og:title"]') ? res.at('meta[property="og:title"]')[:content].strip : "NF"
+				if article_title == "NF"
+					article_title = res.title != nil ? res.title.strip : "NF"
+				end
+				time_published = res.at('meta[property="article:published_time"]')?res.at('meta[property="article:published_time"]')[:content]:"NF"
+				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
+				logger.info "PARSEDSUCCESSFULLY :"
+			else
+				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
+				logger.error "PARSINGFAILED : response is nil"
+			end
+		}
+	rescue => e
+		s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
+		logger.error "PARSERFAILED : #{e.message}"
 	end
 
 end

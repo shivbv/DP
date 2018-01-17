@@ -11,6 +11,7 @@ class ScrapEntity < ApplicationRecord
 	scope :twitter, -> { where(:category => Category::TWITTER)}
 	scope :webhost, -> { where(:category => Category::WEBHOST)}
   scope :article_details, -> { where(:category => Category::ARTICLE_DETAILS)}
+
 	module Status
 		NOTEXECUTED = 0
 		EXECUTED = 1

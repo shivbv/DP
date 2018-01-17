@@ -58,6 +58,13 @@ namespace :scraping do
 		ScrapEntity.batch_create(URL, params, ScrapEntity::Category::WEBHOST, ScrapEntity::Status::NOTEXECUTED)
 	end
 		
+	task :article_details => :environment do
+		params = eval(ENV["params"]) || {:headers => {}, :parameter => [], :referer => nil}
+		filename = ENV["filename"] || ""
+		article_urls = BvLib.parse_file(filename)
+		ScrapEntity.batch_create(article_urls, params, ScrapEntity::Category::ARTICLE_DETAILS, ScrapEntity::Status::NOTEXECUTED)
+	end
+
 	task :Executer => :environment do
 		entity_ids = ScrapEntity.notexecuted.ids
 		ids_array = entity_ids.in_groups(4, false)
@@ -73,6 +80,7 @@ namespace :scraping do
 		Parser.scanbacklinks if category == ScrapEntity::Category::SCANBACKLINKS
 		Parser.twitter if category == ScrapEntity::Category::TWITTER
 		Parser.webhost if category == ScrapEntity::Category::WEBHOST
+		Parser.article_details if category == ScrapEntity::Category::ARTICLE_DETAILS
 	end
 
 end
