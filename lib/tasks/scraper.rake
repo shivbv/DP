@@ -9,8 +9,6 @@ namespace :scraping do
 		"#{Base_url}#{url}/all"
 		}
 		ScrapEntity.batch_create(urls, params, ScrapEntity::Category::SIMILARWEB, ScrapEntity::Status::NOTEXECUTED)
-		#Rake::Task["Executer"].invoke
-		#Rake::Task["scraping:Parser"].invoke(ScrapEntity::Category::SIMILARWEB)
 	end
 
 	task :trafficestimate => :environment do
@@ -24,6 +22,42 @@ namespace :scraping do
 		ScrapEntity.batch_create(urls, params, ScrapEntity::Category::TRAFFICESTIMATE, ScrapEntity::Status::NOTEXECUTED)
 	end
 
+	task :scanbacklinks => :environment do
+		URL = 'https://scanbacklinks.com/check-dapa'
+		param = eval(ENV["params"]) || {:headers => {}, :parameter => [], :referer => nil}
+		filename = ENV["filename"] || ""
+		websites = BvLib.parse_file(filename)
+		params = [] 
+		websites.each { |website|
+			hash = {:headers => param[:headers], :parameter => param[:parameter], :referer => param[:referer] , :website => website}
+			params << hash
+		}
+		ScrapEntity.batch_create(URL, params, ScrapEntity::Category::SCANBACKLINKS, ScrapEntity::Status::NOTEXECUTED)
+	end
+
+	task :twitter => :environment do
+		params = eval(ENV["params"]) || {:headers => {}, :parameter => [], :referer => nil}
+		filename = ENV["filename"] || ""
+		profiles = BvLib.parse_file(filename)
+		urls = profiles.collect {|profile|
+											"https://#{profile}"
+		}
+		ScrapEntity.batch_create(urls, params, ScrapEntity::Category::TWITTER, ScrapEntity::Status::NOTEXECUTED)
+	end
+
+	task :webhost => :environment do 
+		URL = "https://www.webhostinghero.com/who-is-hosting/"
+		param = eval(ENV["params"]) || {:headers => {}, :parameter => [], :referer => nil}
+		filename = ENV["filename"] || ""
+		websites = BvLib.parse_file(filename)
+		params = []
+		websites.each { |website|
+			hash = {:headers => param[:headers], :parameter => param[:parameter], :referer => param[:referer] , :website => website}
+			params << hash
+		}
+		ScrapEntity.batch_create(URL, params, ScrapEntity::Category::WEBHOST, ScrapEntity::Status::NOTEXECUTED)
+	end
+		
 	task :Executer => :environment do
 		entity_ids = ScrapEntity.notexecuted.ids
 		ids_array = entity_ids.in_groups(4, false)
@@ -36,6 +70,9 @@ namespace :scraping do
 	task :Parser => :environment do
 		category = ENV['category'].to_i
 		Parser.similarweb if category == ScrapEntity::Category::SIMILARWEB
+		Parser.scanbacklinks if category == ScrapEntity::Category::SCANBACKLINKS
+		Parser.twitter if category == ScrapEntity::Category::TWITTER
+		Parser.webhost if category == ScrapEntity::Category::WEBHOST
 	end
 
 end

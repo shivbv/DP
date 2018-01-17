@@ -9,7 +9,8 @@ class ScrapEntity < ApplicationRecord
 	scope :trafficestimate, -> { where(:category => Category::TRAFFICESTIMATE)}
 	scope :scanbacklinks, -> { where(:category => Category::SCANBACKLINKS)}
 	scope :twitter, -> { where(:category => Category::TWITTER)}
-							
+	scope :webhost, -> { where(:category => Category::WEBHOST)}
+
 	module Status
 		NOTEXECUTED = 0
 		EXECUTED = 1
@@ -23,6 +24,7 @@ class ScrapEntity < ApplicationRecord
 		TRAFFICESTIMATE = 2
 		SCANBACKLINKS = 3
 		TWITTER = 4
+		WEBHOST = 5
 	end
 
 	def logger
@@ -50,13 +52,21 @@ class ScrapEntity < ApplicationRecord
 
 	def self.batch_create(urls, params, category, status = Status::NOTEXECUTED)
 		update_array = []
-		urls.each { |url|
-			data = "('#{url}', '#{params.to_yaml}', #{category}, #{status}, '#{Time.now.getutc}', '#{Time.now.getutc}')"
+		if params.is_a?(Array)
+			params.each { |param|
+			data = "('#{urls}', '#{param.to_yaml}', #{category}, #{status}, '#{Time.now.getutc}', '#{Time.now.getutc}')"
 			update_array << data
-		}
+			}
+		else
+			urls.each { |url|
+				data = "('#{url}', '#{params.to_yaml}', #{category}, #{status}, '#{Time.now.getutc}', '#{Time.now.getutc}')"
+				update_array << data
+			}
+		end
 		while !update_array.empty?
 			ActiveRecord::Base.connection.execute("INSERT INTO scrap_entities (url, params, category, status, created_at, updated_at)
 					VALUES #{update_array.shift(4096).join(',')}")
 		end
 	end
+
 end

@@ -50,22 +50,26 @@ class Parser
 		logger.error "PARSERFAILED : #{e.message}"
 	end
 
-=begin
-	def self.scanbacklink()
+
+	def self.scanbacklinks()
 		scrap_entities = ScrapEntity.executed.scanbacklinks
 		scrap_entities.each { |s_entity|
-			logger = s_entity.logger
-			res = get_response(s_entity)
-			if res != nil
-					form = res.form_with(:id => 'check-da-form')
-
-					form.field_with(:id => 'checkform-site').value = "dzone.com"
+			begin
+				logger = s_entity.logger
+				res = get_response(s_entity)
+				da = res.search('.result-content span')[1].text
+				pa = res.search('.result-content span')[2].text
+				#puts "#{da}  #{pa} "
+				logger.info "PARSEDSUCCESSFULLY :"
+				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)	
+			rescue => e
+				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
+				logger.error "PARSERFAILED : #{e.message}"
 			end
 		}
 	end
-=end
 
-	def twitter
+	def self.twitter
 		scrap_entities = ScrapEntity.executed.twitter
 		scrap_entities.each { |s_entity|
 			logger = s_entity.logger
@@ -73,14 +77,38 @@ class Parser
 			if res != nil
 				website  = res.css('.ProfileHeaderCard-url span a.u-textUserColor')[0] != nil ?
 									 res.css('.ProfileHeaderCard-url span a.u-textUserColor')[0]['title'] : "not found"
-				geography = page.css('.ProfileHeaderCard-location span')[1] != nil ?
-										page.css('.ProfileHeaderCard-location span')[1].text.strip : "Not Found"
-				follower_count = page.search('span.ProfileNav-value')[2] != nil ? page.search('span.ProfileNav-value')[2].text : "Not Found"
+				geography = res.css('.ProfileHeaderCard-location span')[1] != nil ?
+										res.css('.ProfileHeaderCard-location span')[1].text.strip : "Not Found"
+				follower_count = res.search('span.ProfileNav-value')[2] != nil ? res.search('span.ProfileNav-value')[2].text : "Not Found"
+				puts "#{website}  #{geography}  #{follower_count} "
 				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
 				logger.info "PARSEDSUCCESSFULLY :"
 			else
 				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
 				logger.error "PARSINGFAILED : response is nil"
+			end
+		}
+	end
+
+	def self.webhost
+		scrap_entities = ScrapEntity.executed.webhost
+		scrap_entities.each { |s_entity|
+			begin
+				logger = s_entity.logger
+				res = get_response(s_entity)
+				a_tag = res.search("header.align-center")[0]
+				value1 = a_tag.search('a').text
+				value2 = a_tag.search('h2').text
+				if value1 == nil || value1 =~ /^Click Here/
+					puts value2
+				else
+					puts [value1, value2]
+        end
+				logger.info "PARSEDSUCCESSFULLY :"
+				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
+			rescue => e
+				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
+				logger.error "PARSERFAILED : #{e.message}"
 			end
 		}
 	end
