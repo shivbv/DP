@@ -10,7 +10,7 @@ class ScrapEntity < ApplicationRecord
 	scope :scanbacklinks, -> { where(:category => Category::SCANBACKLINKS)}
 	scope :twitter, -> { where(:category => Category::TWITTER)}
 	scope :webhost, -> { where(:category => Category::WEBHOST)}
-
+  scope :article_details, -> { where(:category => Category::ARTICLE_DETAILS)}
 	module Status
 		NOTEXECUTED = 0
 		EXECUTED = 1
@@ -25,6 +25,7 @@ class ScrapEntity < ApplicationRecord
 		SCANBACKLINKS = 3
 		TWITTER = 4
 		WEBHOST = 5
+		ARTICLE_DETAILS = 6
 	end
 
 	def logger
