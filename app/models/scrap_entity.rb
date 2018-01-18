@@ -11,6 +11,8 @@ class ScrapEntity < ApplicationRecord
 	scope :twitter, -> { where(:category => Category::TWITTER)}
 	scope :webhost, -> { where(:category => Category::WEBHOST)}
 	scope :restapi, -> { where(:category => Category::RESTAPI)}
+	scope :checkwp, -> { where(:category => Category::CHECKWP)}
+	scope :whois, -> { where(:category => Category::WHOIS)}
 
 	module Status
 		NOTEXECUTED = 0
@@ -27,6 +29,8 @@ class ScrapEntity < ApplicationRecord
 		TWITTER = 4
 		WEBHOST = 5
 		RESTAPI = 7
+		CHECKWP = 8
+		WHOIS = 10	
 	end
 
 	def logger
@@ -56,8 +60,8 @@ class ScrapEntity < ApplicationRecord
 		update_array = []
 		if params.is_a?(Array)
 			params.each { |param|
-			data = "('#{urls}', '#{param.to_yaml}', #{category}, #{status}, '#{Time.now.getutc}', '#{Time.now.getutc}')"
-			update_array << data
+				data = "('#{urls}', '#{param.to_yaml}', #{category}, #{status}, '#{Time.now.getutc}', '#{Time.now.getutc}')"
+				update_array << data
 			}
 		else
 			urls.each { |url|

@@ -28,9 +28,9 @@ class Parser
 	def self.trafficestimate()
 		scrap_entities = ScrapEntity.executed.trafficestimate
 		scrap_entities.each { |s_entity|
-			logger = s_entity.logger
-			res = get_response(s_entity)
-			if res != nil
+			begin
+				logger = s_entity.logger
+				res = get_response(s_entity)
 				traffic_estimate = res.search("div#ctl00_cphMainContent_ucGoogleMonthlyChart_pnlEstimateOnly div.chart-yoy span span span").text
 				if traffic_estimate == ""
 					traffic_estimate = res.search("span#ctl00_cphMainContent_estVisitsSpan").text
@@ -40,14 +40,11 @@ class Parser
 				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
 				puts [site, traffic_estimate]
 				logger.info "PARSEDSUCCESSFULLY :"
-			else
+			rescue => e
 				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
 				logger.error "PARSINGFAILED : response is nil"
 			end
 		}
-	rescue
-		s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
-		logger.error "PARSERFAILED : #{e.message}"
 	end
 
 
@@ -76,12 +73,12 @@ class Parser
 			res = get_response(s_entity)
 			if res != nil
 				website  = res.css('.ProfileHeaderCard-url span a.u-textUserColor')[0] != nil ?
-									 res.css('.ProfileHeaderCard-url span a.u-textUserColor')[0]['title'] : "not found"
-				geography = res.css('.ProfileHeaderCard-location span')[1] != nil ?
-										res.css('.ProfileHeaderCard-location span')[1].text.strip : "Not Found"
-				follower_count = res.search('span.ProfileNav-value')[2] != nil ? res.search('span.ProfileNav-value')[2].text : "Not Found"
-				puts "#{website}  #{geography}  #{follower_count} "
-				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
+					res.css('.ProfileHeaderCard-url span a.u-textUserColor')[0]['title'] : "not found"
+					geography = res.css('.ProfileHeaderCard-location span')[1] != nil ?
+					res.css('.ProfileHeaderCard-location span')[1].text.strip : "Not Found"
+					follower_count = res.search('span.ProfileNav-value')[2] != nil ? res.search('span.ProfileNav-value')[2].text : "Not Found"
+					puts "#{website}  #{geography}  #{follower_count} "
+					s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
 				logger.info "PARSEDSUCCESSFULLY :"
 			else
 				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
@@ -103,7 +100,7 @@ class Parser
 					puts value2
 				else
 					puts [value1, value2]
-        end
+				end
 				logger.info "PARSEDSUCCESSFULLY :"
 				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
 			rescue => e
@@ -123,7 +120,7 @@ class Parser
 				res_ar.each { |response|
 					users = JSON.parse(response)
 					users.each { |user|
-					puts "#{user["id"]}  #{user["name"]}   #{user["url"]}  #{user["description"]} #{user["link"]} "
+						puts "#{user["id"]}  #{user["name"]}   #{user["url"]}  #{user["description"]} #{user["link"]} "
 					}
 				}
 				logger.info "PARSEDSUCCESSFULLY :"
@@ -133,6 +130,66 @@ class Parser
 				logger.error "PARSERFAILED : #{e.message}"
 			end
 		}
+	end
+
+	def self.checkwp
+		scrap_entities = ScrapEntity.executed.checkwp
+		scrap_entities.each { |s_entity|
+			logger = s_entity.logger
+			res = get_response(s_entity)
+			if res != nil
+				puts "WP SITE"	if res.body =~ /wp-content/ || res.body =~ /wp-uploads/
+					logger.info "PARSEDSUCCESSFULLY :"
+					s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
+			end
+		}
+	rescue => e
+		s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
+		logger.error "PARSERFAILED : #{e.message}"
+	end
+
+	def self.whois
+		scrap_entities = ScrapEntity.executed.whois
+		scrap_entities.each { |s_entity|
+			logger = s_entity.logger
+			res = get_response(s_entity)
+			registrant_name = ""
+			organization_name = ""
+			registrant_state = ""
+			registrant_country = ""
+			registrant_email = ""
+			admin_email = ""
+			name_server = Array.new
+			res.body.to_s.each_line { |line|
+				if registrant_name == "" && line =~ /Registrant Name:/
+					registrant_name = line.gsub(/Registrant Name:/,"")
+				end
+				if organization_name == "" && line =~ /Registrant Organization:/
+					organization_name = line.gsub(/Registrant Organization:/,"")
+				end
+				if registrant_state == "" && line=~ /Registrant State\/Province:/
+					registrant_state = line.gsub(/Registrant State\/Province:/,"")
+				end
+				if registrant_country == "" && line=~ /Registrant Country:/
+					registrant_country = line.gsub(/Registrant Country:/,"")
+				end
+				if registrant_email == "" && line=~ /Registrant Email:/
+					registrant_email = line.gsub(/Registrant Email:/,"")
+				end
+				if admin_email == "" && line =~ /Admin Email:/
+					admin_email = line.gsub(/Admin Email:/,"")
+				end
+				if(line =~ /^Name Server: /)
+					name_server.push(line.gsub(/Name Server:/,""))
+				end
+			}
+			puts [registrant_name, organization_name, registrant_state, registrant_country, registrant_email, admin_email]
+			logger.info "PARSEDSUCCESSFULLY :"
+			s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
+		}
+	rescue => e
+		s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
+		logger.error "PARSERFAILED : #{e.message}"
 	end
 
 end

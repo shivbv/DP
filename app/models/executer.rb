@@ -3,9 +3,17 @@ class Executer
 		:execute
 	end
 
+	@proxy = []
+	@response = nil
+	def self.proxy_list
+		File.open('/home/sumit/proxyfile/proxy.txt').each_line{|proxy|
+				@proxy << proxy
+		}
+	end
+
 	def self.perform(ids_array)
 		s_entities = ScrapEntity.find(ids_array)
-		response = nil
+		proxy_list
 		s_entities.each { |s_entity|
 			begin
 				logger = s_entity.logger
@@ -14,24 +22,29 @@ class Executer
 				headers = params[:headers] || {}
 				referer = params[:referer]
 				parameters = params[:parameters] || []
-				response = Request.callback(url, parameters, referer, headers, logger) if response == nil
 				if s_entity.category == ScrapEntity::Category::SCANBACKLINKS || s_entity.category == ScrapEntity::Category::WEBHOST
+					@response = Request.callback(url, parameters, referer, headers, nil, logger) if @response == nil
 					form_action = params[:action]
 					field_id = params[:field_with]
-					res = Request.formsubmit(response, params[:website], form_action, field_id, logger)
+					res = Request.formsubmit(@response, params[:website], form_action, field_id, logger)
 				elsif s_entity.category == ScrapEntity::Category::RESTAPI
-					jsonarray = []
+					resarray = []
 					for index in 1..10000
 						request_url = "#{url}?page=#{index}"
-						res = Request.callback(request_url, parameters, referer, headers, logger)
+						res = Request.callback(request_url, parameters, referer, headers, nil, logger)
 						break if res.body == '[]'
-						jsonarray << res.body
+						resarray << res.body
 					end
-					s_entity.file_write(jsonarray)
+					s_entity.file_write(resarray)
+					s_entity.update_attributes!(:status => ScrapEntity::Status::EXECUTED)
+					next
+				elsif s_entity.category == ScrapEntity::Category::WHOIS
+					res = Request.getwhois(url,logger)
+					s_entity.file_write(res.to_s)
 					s_entity.update_attributes!(:status => ScrapEntity::Status::EXECUTED)
 					next
 				else
-					res = Request.callback(url, parameters, referer, headers, logger)
+					res = Request.callback(url, parameters, referer, headers, nil, logger)
 				end
 				s_entity.file_write(res.body)
 				s_entity.update_attributes!(:status => ScrapEntity::Status::EXECUTED)
@@ -41,4 +54,5 @@ class Executer
 			end
 		}
 	end
+
 end

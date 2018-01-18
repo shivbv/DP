@@ -71,7 +71,23 @@ namespace :scraping do
 		ScrapEntity.batch_create(urls, params, ScrapEntity::Category::RESTAPI, ScrapEntity::Status::NOTEXECUTED)
 	end
 
-		
+	task :checkwp => :environment do
+		params = eval(ENV["params"]) || {:headers => {}, :parameter => [], :referer => nil}
+		filename = ENV["filename"] || ""
+		websites = BvLib.parse_file(filename)
+		urls = websites.collect {|website|
+			                      "https://#{website}"
+		}
+		ScrapEntity.batch_create(urls, params, ScrapEntity::Category::CHECKWP, ScrapEntity::Status::NOTEXECUTED)
+	end
+
+	task :whois => :environment do
+		params = eval(ENV["params"]) || {:headers => {}, :parameter => [], :referer => nil}
+		filename = ENV["filename"] || ""
+		urls = BvLib.parse_file(filename)
+		ScrapEntity.batch_create(urls, params, ScrapEntity::Category::WHOIS, ScrapEntity::Status::NOTEXECUTED)
+	end
+	
 	task :Executer => :environment do
 		entity_ids = ScrapEntity.notexecuted.ids
 		ids_array = entity_ids.in_groups(4, false)
@@ -84,10 +100,13 @@ namespace :scraping do
 	task :Parser => :environment do
 		category = ENV['category'].to_i
 		Parser.similarweb if category == ScrapEntity::Category::SIMILARWEB
+		Parser.trafficestimate if category == ScrapEntity::Category::TRAFFICESTIMATE
 		Parser.scanbacklinks if category == ScrapEntity::Category::SCANBACKLINKS
 		Parser.twitter if category == ScrapEntity::Category::TWITTER
 		Parser.webhost if category == ScrapEntity::Category::WEBHOST
 		Parser.restapi if category == ScrapEntity::Category::RESTAPI
+		Parser.checkwp if category == ScrapEntity::Category::CHECKWP
+		Parser.whois if category == ScrapEntity::Category::WHOIS
 	end
 
 end

@@ -7,6 +7,8 @@ end
 
 gem 'resque'
 
+gem 'whois'
+
 gem 'resque-web'
 gem 'activerecord-import'
 gem 'rake'
