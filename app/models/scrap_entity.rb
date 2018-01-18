@@ -10,6 +10,7 @@ class ScrapEntity < ApplicationRecord
 	scope :scanbacklinks, -> { where(:category => Category::SCANBACKLINKS)}
 	scope :twitter, -> { where(:category => Category::TWITTER)}
 	scope :webhost, -> { where(:category => Category::WEBHOST)}
+	scope :restapi, -> { where(:category => Category::RESTAPI)}
 
 	module Status
 		NOTEXECUTED = 0
@@ -25,6 +26,7 @@ class ScrapEntity < ApplicationRecord
 		SCANBACKLINKS = 3
 		TWITTER = 4
 		WEBHOST = 5
+		RESTAPI = 7
 	end
 
 	def logger
@@ -41,7 +43,7 @@ class ScrapEntity < ApplicationRecord
 	end
 
 	def	file_write(content)
-		File.open(filename, 'wb') { |file|
+		File.open(filename, 'ab+') { |file|
 			file.write(content)
 		}
 	end

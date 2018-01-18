@@ -59,7 +59,7 @@ class Parser
 				res = get_response(s_entity)
 				da = res.search('.result-content span')[1].text
 				pa = res.search('.result-content span')[2].text
-				#puts "#{da}  #{pa} "
+				puts "#{da}  #{pa} "
 				logger.info "PARSEDSUCCESSFULLY :"
 				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)	
 			rescue => e
@@ -104,6 +104,28 @@ class Parser
 				else
 					puts [value1, value2]
         end
+				logger.info "PARSEDSUCCESSFULLY :"
+				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
+			rescue => e
+				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
+				logger.error "PARSERFAILED : #{e.message}"
+			end
+		}
+	end
+
+	def self.restapi
+		scrap_entities = ScrapEntity.executed.restapi
+		scrap_entities.each { |s_entity|
+			begin
+				logger = s_entity.logger
+				res = get_response(s_entity)
+				res_ar = JSON.parse(res.body)
+				res_ar.each { |response|
+					users = JSON.parse(response)
+					users.each { |user|
+					puts "#{user["id"]}  #{user["name"]}   #{user["url"]}  #{user["description"]} #{user["link"]} "
+					}
+				}
 				logger.info "PARSEDSUCCESSFULLY :"
 				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
 			rescue => e

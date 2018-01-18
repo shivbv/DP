@@ -15,10 +15,21 @@ class Executer
 				referer = params[:referer]
 				parameters = params[:parameters] || []
 				response = Request.callback(url, parameters, referer, headers, logger) if response == nil
-				if s_entity.category == ScrapEntity::Category::SCANBACKLINKS
-					res = Request.formsubmit_id(response, params[:website], 'check-da-form', 'checkform-site', logger)
-				elsif s_entity.category == ScrapEntity::Category::WEBHOST
-					res = Request.formsubmit_no(response, params[:website], 0, 'url', logger)
+				if s_entity.category == ScrapEntity::Category::SCANBACKLINKS || s_entity.category == ScrapEntity::Category::WEBHOST
+					form_action = params[:action]
+					field_id = params[:field_with]
+					res = Request.formsubmit(response, params[:website], form_action, field_id, logger)
+				elsif s_entity.category == ScrapEntity::Category::RESTAPI
+					jsonarray = []
+					for index in 1..10000
+						request_url = "#{url}?page=#{index}"
+						res = Request.callback(request_url, parameters, referer, headers, logger)
+						break if res.body == '[]'
+						jsonarray << res.body
+					end
+					s_entity.file_write(jsonarray)
+					s_entity.update_attributes!(:status => ScrapEntity::Status::EXECUTED)
+					next
 				else
 					res = Request.callback(url, parameters, referer, headers, logger)
 				end

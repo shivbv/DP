@@ -29,7 +29,8 @@ namespace :scraping do
 		websites = BvLib.parse_file(filename)
 		params = [] 
 		websites.each { |website|
-			hash = {:headers => param[:headers], :parameter => param[:parameter], :referer => param[:referer] , :website => website}
+			hash = {:headers => param[:headers], :parameter => param[:parameter], :referer => param[:referer], :website => website,
+								:action => '/check-dapa', :field_with => 'checkform-site' }
 			params << hash
 		}
 		ScrapEntity.batch_create(URL, params, ScrapEntity::Category::SCANBACKLINKS, ScrapEntity::Status::NOTEXECUTED)
@@ -52,11 +53,24 @@ namespace :scraping do
 		websites = BvLib.parse_file(filename)
 		params = []
 		websites.each { |website|
-			hash = {:headers => param[:headers], :parameter => param[:parameter], :referer => param[:referer] , :website => website}
+			hash = {:headers => param[:headers], :parameter => param[:parameter], :referer => param[:referer] , :website => website,
+							:action => 'https://www.webhostinghero.com/who-is-hosting/', :field_with => 'url'}
 			params << hash
 		}
 		ScrapEntity.batch_create(URL, params, ScrapEntity::Category::WEBHOST, ScrapEntity::Status::NOTEXECUTED)
 	end
+
+	task :restapi => :environment do
+		url_last = "wp-json/wp/v2/users"
+		params = eval(ENV["params"]) || {:headers => {}, :parameter => [], :referer => nil}
+		filename = ENV["filename"] || ""
+		websites = BvLib.parse_file(filename)
+		urls = websites.collect {|website|
+			                      "https://#{website}/#{url_last}"
+		}
+		ScrapEntity.batch_create(urls, params, ScrapEntity::Category::RESTAPI, ScrapEntity::Status::NOTEXECUTED)
+	end
+
 		
 	task :Executer => :environment do
 		entity_ids = ScrapEntity.notexecuted.ids
@@ -73,6 +87,7 @@ namespace :scraping do
 		Parser.scanbacklinks if category == ScrapEntity::Category::SCANBACKLINKS
 		Parser.twitter if category == ScrapEntity::Category::TWITTER
 		Parser.webhost if category == ScrapEntity::Category::WEBHOST
+		Parser.restapi if category == ScrapEntity::Category::RESTAPI
 	end
 
 end
