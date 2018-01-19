@@ -192,4 +192,27 @@ class Parser
 		logger.error "PARSERFAILED : #{e.message}"
 	end
 
+	def self.article_details
+		scrap_entities = ScrapEntity.executed.article_details
+		scrap_entities.each { |s_entity|
+			logger = s_entity.logger
+			res = get_response(s_entity)
+			if res != nil
+				article_title = res.at('meta[property="og:title"]') ? res.at('meta[property="og:title"]')[:content].strip : "NF"
+				if article_title == "NF"
+					article_title = res.title != nil ? res.title.strip : "NF"
+				end
+				time_published = res.at('meta[property="article:published_time"]')?res.at('meta[property="article:published_time"]')[:content]:"NF"
+				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
+				logger.info "PARSEDSUCCESSFULLY :"
+			else
+				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
+				logger.error "PARSINGFAILED : response is nil"
+			end
+		}
+	rescue => e
+		s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
+		logger.error "PARSERFAILED : #{e.message}"
+	end
+
 end

@@ -87,7 +87,14 @@ namespace :scraping do
 		urls = BvLib.parse_file(filename)
 		ScrapEntity.batch_create(urls, params, ScrapEntity::Category::WHOIS, ScrapEntity::Status::NOTEXECUTED)
 	end
-	
+		
+	task :article_details => :environment do
+		params = eval(ENV["params"]) || {:headers => {}, :parameter => [], :referer => nil}
+		filename = ENV["filename"] || ""
+		article_urls = BvLib.parse_file(filename)
+		ScrapEntity.batch_create(article_urls, params, ScrapEntity::Category::ARTICLE_DETAILS, ScrapEntity::Status::NOTEXECUTED)
+	end
+
 	task :Executer => :environment do
 		entity_ids = ScrapEntity.notexecuted.ids
 		ids_array = entity_ids.in_groups(4, false)
@@ -107,6 +114,7 @@ namespace :scraping do
 		Parser.restapi if category == ScrapEntity::Category::RESTAPI
 		Parser.checkwp if category == ScrapEntity::Category::CHECKWP
 		Parser.whois if category == ScrapEntity::Category::WHOIS
+		Parser.article_details if category == ScrapEntity::Category::ARTICLE_DETAILS
 	end
 
 end

@@ -13,6 +13,7 @@ class ScrapEntity < ApplicationRecord
 	scope :restapi, -> { where(:category => Category::RESTAPI)}
 	scope :checkwp, -> { where(:category => Category::CHECKWP)}
 	scope :whois, -> { where(:category => Category::WHOIS)}
+  scope :article_details, -> { where(:category => Category::ARTICLE_DETAILS)}
 
 	module Status
 		NOTEXECUTED = 0
@@ -31,6 +32,7 @@ class ScrapEntity < ApplicationRecord
 		RESTAPI = 7
 		CHECKWP = 8
 		WHOIS = 10	
+		ARTICLE_DETAILS = 6
 	end
 
 	def logger
