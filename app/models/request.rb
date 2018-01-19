@@ -1,6 +1,5 @@
 class Request
 	def self.callback(url, parameters, referer, headers, proxy, logger = Logger.new(STDOUT))
-		tries ||= 2
 		logger.info "CALLSERVER : #{parameters} : #{referer} : #{headers}"
 		mechanize = Mechanize.new
 		if proxy
@@ -11,8 +10,17 @@ class Request
 		logger.info "CALLRESPONSE : #{response.code}"
 		return response
 	rescue => e
-		logger.error "CALLBACKRETRY : try#{tries} : #{e.message}"	
-		retry if !(tries -= 1).zero?
+		logger.error "CALLBACKFAILED : #{e.message}"
+		raise e
+	end
+
+	def self.postrequest(url, query, headers, logger = Logger.new(STDOUT))
+		logger.info "CALLSERVER : #{url} : #{query} : #{headers}"
+		mechanize = Mechanize.new
+		response = mechanize.post(url, query, headers)
+		logger.info "CALLRESPONSE : #{response.code}"
+		return response
+	rescue => e
 		logger.error "CALLBACKFAILED : #{e.message}"
 		raise e
 	end

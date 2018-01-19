@@ -214,5 +214,28 @@ class Parser
 		s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
 		logger.error "PARSERFAILED : #{e.message}"
 	end
+	
+	def self.safebrowsing
+		scrap_entities = ScrapEntity.executed.safebrowsing
+		scrap_entities.each { |s_entity|
+			logger = s_entity.logger
+			res = get_response(s_entity)
+			data = JSON.parse(res.body)
+			urls = []
+			matches = data["matches"]
+			if matches != nil
+			matches.each { |entry|
+				urls << entry["threat"]["url"]
+			}
+			end
+			urls.uniq!
+			puts urls
+			s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
+				logger.info "PARSEDSUCCESSFULLY :"
+		}
+	rescue => e
+ 		s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
+		logger.error "PARSERFAILED : #{e.message}"
+	end
 
 end

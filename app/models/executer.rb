@@ -2,7 +2,6 @@ class Executer
 	def self.queue
 		:execute
 	end
-
 	@proxy = []
 	@response = nil
 	def self.proxy_list
@@ -22,7 +21,12 @@ class Executer
 				headers = params[:headers] || {}
 				referer = params[:referer]
 				parameters = params[:parameters] || []
-				if s_entity.category == ScrapEntity::Category::SCANBACKLINKS || s_entity.category == ScrapEntity::Category::WEBHOST
+				if s_entity.category == ScrapEntity::Category::SAFEBROWSING
+					key = params[:key]
+					url = url+key
+					query = params[:query]
+					res = Request.postrequest(url, query.to_json, headers, logger)
+				elsif s_entity.category == ScrapEntity::Category::SCANBACKLINKS || s_entity.category == ScrapEntity::Category::WEBHOST
 					@response = Request.callback(url, parameters, referer, headers, nil, logger) if @response == nil
 					form_action = params[:action]
 					field_id = params[:field_with]

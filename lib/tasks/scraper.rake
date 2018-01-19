@@ -95,6 +95,35 @@ namespace :scraping do
 		ScrapEntity.batch_create(article_urls, params, ScrapEntity::Category::ARTICLE_DETAILS, ScrapEntity::Status::NOTEXECUTED)
 	end
 
+	task :safebrowsing => :environment do
+		URL = "https://safebrowsing.googleapis.com/v4/threatMatches:find?key="
+		param = eval(ENV["params"]) || {:headers => {'Content-Type'=> 'application/json'}, :parameter => [], :referer => nil}
+		filename = ENV["filename"] || ""
+		key = ENV["key"] || ""
+		websites = BvLib.parse_file(filename)
+		websites = websites.collect { |website| 
+			{'url' => "http://www.#{website}/"}
+		}
+		params = []
+		while !websites.empty?
+			query =	{
+								"client": {
+									"clientId":      "test",
+																	"clientVersion": "1.0.0"
+			},
+																															"threatInfo": {
+									"threatTypes":      ["MALWARE", "SOCIAL_ENGINEERING","POTENTIALLY_HARMFUL_APPLICATION","UNWANTED_SOFTWARE"],
+																	"platformTypes":    ["WINDOWS","ANY_PLATFORM","OSX","LINUX","ALL_PLATFORMS","CHROME","ANDROID","IOS"],
+																												"threatEntryTypes": ["URL","IP_RANGE"],
+																																										"threatEntries": websites.shift(500)
+			}	
+			}
+			params << {:headers => param[:headers], :parameter => param[:parameter], :referer => param[:referer], 
+				:query => query, :key => key }
+		end
+		ScrapEntity.batch_create(URL, params, ScrapEntity::Category::SAFEBROWSING, ScrapEntity::Status::NOTEXECUTED)
+	end
+
 	task :Executer => :environment do
 		entity_ids = ScrapEntity.notexecuted.ids
 		ids_array = entity_ids.in_groups(4, false)
@@ -115,6 +144,7 @@ namespace :scraping do
 		Parser.checkwp if category == ScrapEntity::Category::CHECKWP
 		Parser.whois if category == ScrapEntity::Category::WHOIS
 		Parser.article_details if category == ScrapEntity::Category::ARTICLE_DETAILS
+		Parser.safebrowsing if category == ScrapEntity::Category::SAFEBROWSING
 	end
 
 end
