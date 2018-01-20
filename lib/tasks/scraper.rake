@@ -30,7 +30,7 @@ namespace :scraping do
 		params = [] 
 		websites.each { |website|
 			hash = {:headers => param[:headers], :parameter => param[:parameter], :referer => param[:referer], :website => website,
-								:action => '/check-dapa', :field_with => 'checkform-site' }
+					:action => '/check-dapa', :field_with => 'checkform-site' }
 			params << hash
 		}
 		ScrapEntity.batch_create(URL, params, ScrapEntity::Category::SCANBACKLINKS, ScrapEntity::Status::NOTEXECUTED)
@@ -40,9 +40,7 @@ namespace :scraping do
 		params = eval(ENV["params"]) || {:headers => {}, :parameter => [], :referer => nil}
 		filename = ENV["filename"] || ""
 		profiles = BvLib.parse_file(filename)
-		urls = profiles.collect {|profile|
-											"https://#{profile}"
-		}
+		urls = profiles.collect { |profile| "https://#{profile}" }
 		ScrapEntity.batch_create(urls, params, ScrapEntity::Category::TWITTER, ScrapEntity::Status::NOTEXECUTED)
 	end
 

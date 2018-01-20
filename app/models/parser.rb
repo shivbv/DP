@@ -38,7 +38,7 @@ class Parser
 					traffic_estimate = traffic_estimate.join(",")
 				end
 				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
-				puts [site, traffic_estimate]
+				puts [s_entity.url, traffic_estimate]
 				logger.info "PARSEDSUCCESSFULLY :"
 			rescue => e
 				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
