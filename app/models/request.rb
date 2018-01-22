@@ -31,6 +31,7 @@ class Request
 		form.submit
 	rescue => e
 		logger.error "FORMSUBMISSIONFAIELD : #{e.message}"
+		raise e
 	end
 
 	def self.getwhois(url, logger = Logger.new(STDOUT))

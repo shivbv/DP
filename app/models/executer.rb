@@ -3,15 +3,14 @@ class Executer
 		:execute
 	end
 	@proxy = []
-	@response = nil
 	def self.proxy_list
 		File.open('/home/sumit/proxyfile/proxy.txt').each_line{ |proxy|
 			@proxy << proxy
 		}
 	end
 
-	def self.perform(ids_array)
-		s_entities = ScrapEntity.find(ids_array)
+	def self.perform(scrapentity_ids)
+		s_entities = ScrapEntity.find(scrapentity_ids)
 		proxy_list
 		count = 0
 		s_entities.each { |s_entity|
@@ -34,12 +33,12 @@ class Executer
 					body = res.body
 				elsif s_entity.category == ScrapEntity::Category::SAFEBROWSING
 					key = params[:key]
-					url = url+key
+					url = url + key
 					query = params[:query]
 					res = Request.postrequest(url, query.to_json, headers, logger)
 					body = res.body
 				elsif s_entity.category == ScrapEntity::Category::SCANBACKLINKS || s_entity.category == ScrapEntity::Category::WEBHOST
-					@response = Request.callback(url, parameters, referer, headers, nil, logger) if @response == nil
+					@response ||= Request.callback(url, parameters, referer, headers, nil, logger)
 					form_action = params[:action]
 					field_id = params[:field_with]
 					res = Request.formsubmit(@response, params[:website], form_action, field_id, logger)

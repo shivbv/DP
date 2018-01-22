@@ -1,14 +1,15 @@
 namespace :scraping do
 
-	task :similarweb => :environment do
-		params = eval(ENV["params"]) || {:headers => {}, :parameter => [], :referer => nil}
-		filename = ENV["filename"] || ""
-		websites = BvLib.parse_file(filename)
-		Base_url = "https://api.similarweb.com/v1/SimilarWebAddon/"
-		urls = websites.collect { |url|
-		"#{Base_url}#{url}/all"
-		}
-		ScrapEntity.batch_create(urls, params, ScrapEntity::Category::SIMILARWEB, ScrapEntity::Status::NOTEXECUTED)
+	task :similarweb, [:params] => :environment do |t, args|
+			puts args[:params]
+	#	params = eval(ENV["params"]) || {:headers => {}, :parameter => [], :referer => nil}
+	#	filename = ENV["filename"] || ""
+	#	websites = BvLib.parse_file(filename)
+	#	Base_url = "https://api.similarweb.com/v1/SimilarWebAddon/"
+	#	urls = websites.collect { |url|
+	#	"#{Base_url}#{url}/all"
+	#	}
+	#	ScrapEntity.batch_create(urls, params, ScrapEntity::Category::SIMILARWEB, ScrapEntity::Status::NOTEXECUTED)
 	end
 
 	task :trafficestimate => :environment do
@@ -104,18 +105,10 @@ namespace :scraping do
 		}
 		params = []
 		while !websites.empty?
-			query =	{
-								"client": {
-									"clientId":      "test",
-																	"clientVersion": "1.0.0"
-			},
-																															"threatInfo": {
-									"threatTypes":      ["MALWARE", "SOCIAL_ENGINEERING","POTENTIALLY_HARMFUL_APPLICATION","UNWANTED_SOFTWARE"],
-																	"platformTypes":    ["WINDOWS","ANY_PLATFORM","OSX","LINUX","ALL_PLATFORMS","CHROME","ANDROID","IOS"],
-																												"threatEntryTypes": ["URL","IP_RANGE"],
-																																										"threatEntries": websites.shift(500)
-			}	
-			}
+			query =	{"client" => {"clientId" => "test", "clientVersion" => "1.0.0"}, "threatInfo" =>  {"threatTypes" =>
+				["MALWARE", "SOCIAL_ENGINEERING", "POTENTIALLY_HARMFUL_APPLICATION", "UNWANTED_SOFTWARE"],
+				"platformTypes" => ["WINDOWS", "ANY_PLATFORM", "OSX", "LINUX", "ALL_PLATFORMS", "CHROME", "ANDROID", "IOS"],
+			  "threatEntryTypes" => ["URL", "IP_RANGE"], "threatEntries" => websites.shift(500)} }
 			params << {:headers => param[:headers], :parameter => param[:parameter], :referer => param[:referer], 
 				:query => query, :key => key }
 		end
@@ -123,12 +116,12 @@ namespace :scraping do
 	end
 
 	task :Executer => :environment do
+		workers = ENV["workers"].to_i
 		entity_ids = ScrapEntity.notexecuted.ids
-		ids_array = entity_ids.in_groups(4, false)
-		Resque.enqueue(Executer, ids_array[0])
-		Resque.enqueue(Executer, ids_array[1])
-		Resque.enqueue(Executer, ids_array[2])
-		Resque.enqueue(Executer, ids_array[3])
+		ids_array = entity_ids.in_groups(workers, false)
+		ids_array.each { |scrapentity_ids|
+		Resque.enqueue(Executer, scrapentity_ids)
+		}
 	end
 
 	task :Parser => :environment do
