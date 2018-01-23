@@ -29,6 +29,7 @@ class Request
 		form = response.form_with(:action => form_action)
 		form.field_with(:id => field_id).value = website
 		form.submit
+		logger.info "FORMSUBMITTED : "
 	rescue => e
 		logger.error "FORMSUBMISSIONFAIELD : #{e.message}"
 		raise e

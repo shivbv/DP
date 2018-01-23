@@ -15,7 +15,8 @@ class ScrapEntity < ApplicationRecord
 	scope :whois, -> { where(:category => Category::WHOIS)}
   scope :article_details, -> { where(:category => Category::ARTICLE_DETAILS)}
 	scope :safebrowsing, -> { where(:category => Category::SAFEBROWSING)}
-	
+	scope :wpplugins, -> { where(:category => Category::WPPLUGINS)}
+
 	module Status
 		NOTEXECUTED = 0
 		EXECUTED = 1
@@ -34,7 +35,8 @@ class ScrapEntity < ApplicationRecord
 		RESTAPI = 7
 		CHECKWP = 8
 		SAFEBROWSING = 9
-		WHOIS = 10	
+		WHOIS = 10
+		WPPLUGINS = 11
 	end
 
 	def logger

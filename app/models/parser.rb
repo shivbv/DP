@@ -60,7 +60,7 @@ class Parser
 
 	def self.scanbacklinks()
 		file_name = ENV["filename"] || "/home/check.csv"
-		keys = ['url', 'DA', 'PA']
+		keys = ['url', 'website', 'DA', 'PA']
 		values = []
 		scrap_entities = ScrapEntity.executed.scanbacklinks
 		scrap_entities.each { |s_entity|
@@ -69,7 +69,7 @@ class Parser
 				res = get_response(s_entity)
 				da = res.search('.result-content span')[1].text
 				pa = res.search('.result-content span')[2].text
-				values << [s_entity.url, da, pa]
+				values << [s_entity.url, s_entity.params[:website], da, pa]
 				logger.info "PARSEDSUCCESSFULLY :"
 				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)	
 			rescue => e
@@ -266,7 +266,7 @@ class Parser
 			}
 			end
 			s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
-				logger.info "PARSEDSUCCESSFULLY :"
+			logger.info "PARSEDSUCCESSFULLY :"
 		}
 		BvLib.write_file(file_name, keys, values)
 	rescue => e
@@ -274,5 +274,45 @@ class Parser
  		s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
 		logger.error "PARSERFAILED : #{e.message}"
 	end
-
+	
+	def self.wpplugins
+		file_name = ENV["filename"] || "/home/check.csv"
+		keys = ["Plugin_name", "Plugin_link", "Plugin_rating", "Plugin_author", "Plugin_active_installs",
+	 		"Plugins_last_update"]
+		values = []
+		scrap_entities = ScrapEntity.executed.wpplugins
+		scrap_entities.each { |s_entity|
+			logger = s_entity.logger
+	    res = get_response(s_entity)
+			for plugin_no in 0..13
+				plugin = res.search('article')[plugin_no]
+		 		plugin_link = plugin.search('a')[0]['href']
+				plugin_name = plugin.search('a')[1].text
+				plugin_rating = 0.0
+				for spantag in 0..4
+					rating_string = plugin.search('span')[spantag]['class']
+					if(rating_string == 'dashicons dashicons-star-filled')
+						plugin_rating += 1
+					elsif (rating_string == 'dashicons dashicons-star-half')
+						plugin_rating += 0.5 
+					else
+						break
+					end  
+				end
+				footer = res.search('footer span')
+				plugin_author = footer[0].text.strip
+				active_install = footer[1].text.strip
+				last_updated = footer[3].text.strip
+				values << [plugin_name, plugin_link, plugin_rating, plugin_author, active_install, last_updated]
+				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
+				logger.info "PARSEDSUCCESSFULLY :"
+		end
+		}
+		 BvLib.write_file(file_name, keys, values)
+	rescue => e
+	BvLib.write_file(file_name, keys, values)
+	s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
+	logger.error "PARSERFAILED : #{e.message}"
+	end
 end
+
