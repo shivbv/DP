@@ -4,6 +4,7 @@ namespace :scraping do
 		params = eval(ENV["params"]) || {:headers => {}, :parameter => [], :referer => nil}
 		filename = ENV["filename"] || ""
 		websites = BvLib.parse_file(filename)
+		websites.uniq!
 		Base_url = "https://api.similarweb.com/v1/SimilarWebAddon/"
 		urls = websites.collect { |url|
 		"#{Base_url}#{url}/all"
@@ -27,6 +28,7 @@ namespace :scraping do
 		param = eval(ENV["params"]) || {:headers => {}, :parameter => [], :referer => nil}
 		filename = ENV["filename"] || ""
 		websites = BvLib.parse_file(filename)
+		websites.uniq!
 		params = [] 
 		websites.each { |website|
 			hash = {:headers => param[:headers], :parameter => param[:parameter], :referer => param[:referer], :website => website,
@@ -114,6 +116,54 @@ namespace :scraping do
 		ScrapEntity.batch_create(URL, params, ScrapEntity::Category::SAFEBROWSING, ScrapEntity::Status::NOTEXECUTED)
 	end
 
+	task :wpplugins => :environment do
+		BASEURL = "https://wordpress.org/plugins/browse/popular/page/"
+		params = eval(ENV["params"]) || {:headers => {}, :parameter => [], :referer => nil}
+		pages = ENV["pages"].to_i
+		index = 1
+		urls = []
+		while index <= pages
+			urls << "#{BASEURL}#{index}/"
+			index += 1
+		end
+		ScrapEntity.batch_create(urls, params, ScrapEntity::Category::WPPLUGINS, ScrapEntity::Status::NOTEXECUTED)
+	end
+
+	task :whosip => :environment do
+		params = eval(ENV["params"]) || {:headers => {}, :parameter => [], :referer => nil}
+		filename = ENV["filename"] || ""
+		websites = BvLib.parse_file(filename)
+		urls = websites.collect{ |website| Resolv.getaddress(website.strip) }
+		ScrapEntity.batch_create(urls, params, ScrapEntity::Category::WHOSIP, ScrapEntity::Status::NOTEXECUTED)	
+	end
+
+	task :extractplugins => :environment do
+		param = eval(ENV["params"]) || {:headers => {}, :parameter => [], :referer => nil}
+		pluginsfile = ENV['pluginsfile'] || ""
+		websitesfile = ENV['websitesfile'] || ""
+		websites = BvLib.parse_file(websitesfile)
+		plugins = BvLib.parse_file(pluginsfile)
+		urls = []
+		params = []
+		websites.each { |website|
+			plugins.each { |plugin|
+			urls << "http://#{website}/wp-content/plugins/#{plugin}/readme.txt"
+			hash = {:headers => param[:headers], :parameter => param[:parameter], :referer => param[:referer] , :website => website,
+				:plugin => plugin}
+			params << hash
+			}
+		}
+		ScrapEntity.batch_create(urls, params, ScrapEntity::Category::EXTRACTPLUGINS, ScrapEntity::Status::NOTEXECUTED)
+	end
+
+	task :advertcheck => :environment do
+		params = eval(ENV["params"]) || {:headers => {}, :parameter => [], :referer => nil}
+		filename = ENV["filename"] || ""
+		websites = BvLib.parse_file(filename)
+		urls = websites.collect{ |website| "https://#{website}" }
+		ScrapEntity.batch_create(urls, params, ScrapEntity::Category::ADVERTCHECK, ScrapEntity::Status::NOTEXECUTED)
+	end
+
 	task :Executer => :environment do
 		workers = ENV["workers"].to_i
 		entity_ids = ScrapEntity.notexecuted.ids
@@ -135,6 +185,10 @@ namespace :scraping do
 		Parser.whois if category == ScrapEntity::Category::WHOIS
 		Parser.article_details if category == ScrapEntity::Category::ARTICLE_DETAILS
 		Parser.safebrowsing if category == ScrapEntity::Category::SAFEBROWSING
+		Parser.wpplugins if category == ScrapEntity::Category::WPPLUGINS
+		Parser.whosip if category == ScrapEntity::Category::WHOSIP
+		Parser.extractplugins if category == ScrapEntity::Category::EXTRACTPLUGINS
+		Parser.advertcheck if category == ScrapEntity::Category::ADVERTCHECK
 	end
 
 end

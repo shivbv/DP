@@ -29,7 +29,7 @@ class Executer
 						count = 0
 					end
 					sleep(2)
-					res = Request.callback(url, parameters, referer, headers, nil, logger)
+					res = Request.getrequest(url, parameters, referer, headers, nil, logger)
 					body = res.body
 				elsif s_entity.category == ScrapEntity::Category::SAFEBROWSING
 					key = params[:key]
@@ -38,7 +38,7 @@ class Executer
 					res = Request.postrequest(url, query.to_json, headers, logger)
 					body = res.body
 				elsif s_entity.category == ScrapEntity::Category::SCANBACKLINKS || s_entity.category == ScrapEntity::Category::WEBHOST
-					@response ||= Request.callback(url, parameters, referer, headers, nil, logger)
+					@response ||= Request.getrequest(url, parameters, referer, headers, nil, logger)
 					form_action = params[:action]
 					field_id = params[:field_with]
 					res = Request.formsubmit(@response, params[:website], form_action, field_id, logger)
@@ -47,16 +47,16 @@ class Executer
 					resarray = []
 					for index in 1..10000
 						request_url = "#{url}?page=#{index}"
-						res = Request.callback(request_url, parameters, referer, headers, nil, logger)
+						res = Request.getrequest(request_url, parameters, referer, headers, nil, logger)
 						break if res.body == '[]'
 						resarray << res.body
 					end
 					body = resarray
-				elsif s_entity.category == ScrapEntity::Category::WHOIS
-					res = Request.getwhois(url,logger)
+				elsif s_entity.category == ScrapEntity::Category::WHOIS || s_entity.category == ScrapEntity::Category::WHOSIP
+					res = Request.getwhois(url, logger)
 					body = res.to_s
 				else
-					res = Request.callback(url, parameters, referer, headers, nil, logger)
+					res = Request.getrequest(url, parameters, referer, headers, nil, logger)
 					body = res.body
 				end
 				s_entity.file_write(body)

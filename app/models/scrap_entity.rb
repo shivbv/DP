@@ -2,9 +2,7 @@ class ScrapEntity < ApplicationRecord
 	serialize :params, Hash
 	scope :notexecuted, -> { where(:status => Status::NOTEXECUTED)}
 	scope :executed, -> { where(:status => Status::EXECUTED)}
-	scope :executionfailed, -> { where(:status => Status::EXECUTIONFAILED)}
 	scope :parsed, -> { where(:status => Status::PARSED)}
-	scope :parsingfailed, -> { where(:status => Status::PARSINGFAILED)}
 	scope :similarweb, -> { where(:category => Category::SIMILARWEB)}
 	scope :trafficestimate, -> { where(:category => Category::TRAFFICESTIMATE)}
 	scope :scanbacklinks, -> { where(:category => Category::SCANBACKLINKS)}
@@ -16,7 +14,10 @@ class ScrapEntity < ApplicationRecord
   scope :article_details, -> { where(:category => Category::ARTICLE_DETAILS)}
 	scope :safebrowsing, -> { where(:category => Category::SAFEBROWSING)}
 	scope :wpplugins, -> { where(:category => Category::WPPLUGINS)}
-
+	scope :whosip, -> { where(:category => Category::WHOSIP)}
+	scope :extractplugins, -> { where(:category => Category::EXTRACTPLUGINS)}
+	scope :advertcheck, -> { where(:category => Category::ADVERTCHECK)}
+	
 	module Status
 		NOTEXECUTED = 0
 		EXECUTED = 1
@@ -37,7 +38,11 @@ class ScrapEntity < ApplicationRecord
 		SAFEBROWSING = 9
 		WHOIS = 10
 		WPPLUGINS = 11
+		WHOSIP = 12
+		EXTRACTPLUGINS = 13
+		ADVERTCHECK = 14
 	end
+
 
 	def logger
 		logger = Logger.new("#{Rails.root.to_s}/log/logfile.log")
@@ -64,7 +69,12 @@ class ScrapEntity < ApplicationRecord
 
 	def self.batch_create(urls, params, category, status = Status::NOTEXECUTED)
 		update_array = []
-		if params.is_a?(Array)
+		if urls.is_a?(Array) && params.is_a?(Array)
+			for index in 0...urls.size
+				data = "('#{urls[index]}', '#{params[index].to_yaml}', #{category}, #{status}, '#{Time.now.getutc}', '#{Time.now.getutc}')"
+				update_array << data
+			end
+		elsif params.is_a?(Array)
 			params.each { |param|
 				data = "('#{urls}', '#{param.to_yaml}', #{category}, #{status}, '#{Time.now.getutc}', '#{Time.now.getutc}')"
 				update_array << data

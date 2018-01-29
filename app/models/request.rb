@@ -1,5 +1,5 @@
 class Request
-	def self.callback(url, parameters, referer, headers, proxy, logger = Logger.new(STDOUT))
+	def self.getrequest(url, parameters, referer, headers, proxy, logger = Logger.new(STDOUT))
 		logger.info "CALLSERVER : #{parameters} : #{referer} : #{headers}"
 		mechanize = Mechanize.new
 		if proxy
@@ -28,15 +28,18 @@ class Request
 	def self.formsubmit(response, website, form_action, field_id, logger = Logger.new(STDOUT))
 		form = response.form_with(:action => form_action)
 		form.field_with(:id => field_id).value = website
-		form.submit
+		res = form.submit
 		logger.info "FORMSUBMITTED : "
+		return res
 	rescue => e
 		logger.error "FORMSUBMISSIONFAIELD : #{e.message}"
 		raise e
 	end
 
 	def self.getwhois(url, logger = Logger.new(STDOUT))
-		Whois.whois(url)
+		response = Whois.whois(url)
+		logger.info "REQUESTSUBMITTED : "
+		return response
 	rescue => e
 		logger.error "WHOISFAILED : #{e.message}"
 		raise e
