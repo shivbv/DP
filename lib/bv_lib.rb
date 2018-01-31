@@ -9,7 +9,7 @@ module BvLib
 	end
 
 	def self.write_file(file_name, keys, values)
-		CSV.open(file_name, 'a+') do |csv|
+		CSV.open(file_name, 'w+') do |csv|
 			csv << keys
 			values.each { |value|
 				csv << value

@@ -17,6 +17,7 @@ class ScrapEntity < ApplicationRecord
 	scope :whosip, -> { where(:category => Category::WHOSIP)}
 	scope :extractplugins, -> { where(:category => Category::EXTRACTPLUGINS)}
 	scope :advertcheck, -> { where(:category => Category::ADVERTCHECK)}
+	scope :extractemail, -> { where(:category => Category::EXTRACTEMAIL)}
 	
 	module Status
 		NOTEXECUTED = 0
@@ -41,6 +42,7 @@ class ScrapEntity < ApplicationRecord
 		WHOSIP = 12
 		EXTRACTPLUGINS = 13
 		ADVERTCHECK = 14
+		EXTRACTEMAIL = 15
 	end
 
 
@@ -48,7 +50,7 @@ class ScrapEntity < ApplicationRecord
 		logger = Logger.new("#{Rails.root.to_s}/log/logfile.log")
 		identifier = "XXXX #{self.url} ===="
 		logger.formatter = proc { |severity, datetime, progname, msg|
-															"#{severity} #{datetime} #{identifier} #{msg}\n"
+			"#{severity} #{datetime} #{identifier} #{msg}\n"
 		}
 		logger
 	end

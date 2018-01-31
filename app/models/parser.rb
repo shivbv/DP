@@ -61,7 +61,7 @@ class Parser
 
 
 	def self.scanbacklinks()
-		file_name = ENV["filename"] || "/home/check.csv"
+		file_name = ENV["filename"] || "/home/sumit/da.csv"
 		keys = ['url', 'website', 'DA', 'PA']
 		values = []
 		scrap_entities = ScrapEntity.executed.scanbacklinks
@@ -186,7 +186,7 @@ class Parser
 	end
 
 	def self.whois
-		file_name = ENV["filename"] || "/home/check.csv"
+		file_name = ENV["filename"] || "/home/sumit/whoisinfo1.csv"
 		keys = ['url', 'registrant_name', 'organization_name', 'registrant_state',
 						'registrant_country', 'registrant_email', 'admin_email']
 		values = []
@@ -211,6 +211,12 @@ class Parser
 						admin_email ||= line.gsub(/Admin Email:/,"") if line =~ /Admin Email:/
 						name_server.push(line.gsub(/Name Server:/,"")) if(line =~ /^Name Server: /)
 				}
+				registrant_state.force_encoding('UTF-8') if registrant_state
+				organization_name.force_encoding('UTF-8') if organization_name
+				registrant_name.force_encoding('UTF-8') if registrant_name
+				registrant_country.force_encoding('UTF-8') if registrant_country
+				registrant_email.force_encoding('UTF-8') if registrant_email
+				admin_email.force_encoding('UTF-8') if admin_email
 				values << [s_entity.url, registrant_name, organization_name, registrant_state, 
 					registrant_country, registrant_email, admin_email]
 				logger.info "PARSEDSUCCESSFULLY :"
@@ -370,17 +376,41 @@ class Parser
 			begin
 				logger = s_entity.logger
 				res = get_response(s_entity)
-				dealpage_status = ""
-				advertpage_status = ""
-				couponpage_status = ""
-				res.body.each_line { |line|
-					dealpage_status = "yes"  if line =~ /deals?/i
-					advertpage_status = "yes" if line =~ /advert/i
-					couponpage_status = "yes" if line =~ /coupon/i
+				res.links.each { |link|
+					dealpage = ""
+					advertpage = ""
+					couponpage = ""
+					dealpage = link.href if link.href =~ /deals?/i
+					advertpage = link.href if link.href =~ /advert?/i
+					couponpage = link.href if link.href =~ /coupon/i
+					values << [s_entity.url, dealpage, advertpage, couponpage] if(couponpage != "" || advertpage != "" || dealpage != "")
 				}
 				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
 				logger.info "PARSEDSUCCESSFULLY :"
-				values << [s_entity.url, dealpage_status, advertpage_status, couponpage_status]
+			rescue => e
+				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
+				logger.error "PARSERFAILED : #{e.message}"
+			end
+		}
+		BvLib.write_file(file_name, keys, values)
+	end
+
+	def self.extractemail
+		file_name = ENV["filename"] || "/home/sumit/check15.csv"
+		keys = ['website', 'email']
+		values = []
+		scrap_entities = ScrapEntity.executed.extractemail
+		scrap_entities.each { |s_entity|
+			begin
+				logger = s_entity.logger
+				res = get_response(s_entity)
+				emails = res.body.scan(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/).flatten
+				if emails != []
+					emails.uniq!
+					emails.each { |email| values << [s_entity.url, email] } 
+				end
+				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
+				logger.info "PARSEDSUCCESSFULLY :"
 			rescue => e
 				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
 				logger.error "PARSERFAILED : #{e.message}"

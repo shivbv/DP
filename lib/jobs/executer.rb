@@ -3,6 +3,7 @@ class Executer
 		:execute
 	end
 	@proxy = []
+
 	def self.proxy_list
 		File.open('/home/sumit/proxyfile/proxy.txt').each_line{ |proxy|
 			@proxy << proxy
@@ -30,7 +31,24 @@ class Executer
 					end
 					sleep(2)
 					res = Request.getrequest(url, parameters, referer, headers, nil, logger)
+					body = res.body + " "
+				elsif s_entity.category == ScrapEntity::Category::EXTRACTEMAIL
+					res = Request.getrequest(url, parameters, referer, headers, nil, logger)
 					body = res.body
+					urls = []
+					if res.links != nil
+						res.links.each { |link| urls << link.href if link.href =~ /about/ || link.href =~ /about/ }
+					end
+					if urls.uniq! != nil
+					urls.each { |url|
+						begin
+						res = Request.getrequest(url, parameters, referer, headers, nil, logger)
+						body += res.body + ""
+						rescue => e
+							logger.error "PAGEOPENFAILED : #{e.message}"
+						end
+					}
+					end
 				elsif s_entity.category == ScrapEntity::Category::SAFEBROWSING
 					key = params[:key]
 					url = url + key

@@ -1,6 +1,6 @@
 namespace :scraping do
 
-	task :similarweb, [:params] => :environment do |t, args|
+	task :similarweb => :environment do 
 		params = eval(ENV["params"]) || {:headers => {}, :parameter => [], :referer => nil}
 		filename = ENV["filename"] || ""
 		websites = BvLib.parse_file(filename)
@@ -164,6 +164,14 @@ namespace :scraping do
 		ScrapEntity.batch_create(urls, params, ScrapEntity::Category::ADVERTCHECK, ScrapEntity::Status::NOTEXECUTED)
 	end
 
+	task :extractemail => :environment do
+		params = eval(ENV["params"]) || {:headers => {}, :parameter => [], :referer => nil}
+		filename = ENV["filename"] || ""
+		websites = BvLib.parse_file(filename)
+		urls = websites.collect{ |website| "https://#{website}" }
+		ScrapEntity.batch_create(urls, params, ScrapEntity::Category::EXTRACTEMAIL, ScrapEntity::Status::NOTEXECUTED)
+	end
+
 	task :Executer => :environment do
 		workers = ENV["workers"].to_i
 		entity_ids = ScrapEntity.notexecuted.ids
@@ -189,6 +197,7 @@ namespace :scraping do
 		Parser.whosip if category == ScrapEntity::Category::WHOSIP
 		Parser.extractplugins if category == ScrapEntity::Category::EXTRACTPLUGINS
 		Parser.advertcheck if category == ScrapEntity::Category::ADVERTCHECK
+		Parser.extractemail if category == ScrapEntity::Category::EXTRACTEMAIL
 	end
 
 end
