@@ -6,9 +6,9 @@ git_source(:github) do |repo_name|
 end
 
 gem 'resque'
-
+gem 'rest-client'
 gem 'whois'
-
+gem 'redis'
 gem 'resque-web'
 gem 'activerecord-import'
 gem 'rake'

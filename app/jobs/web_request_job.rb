@@ -9,17 +9,11 @@ class WebRequestJob < Struct.new(:site_id, :url, :params, :type, :event)
 	end
 
 	def perform
-		debugger
 		res_file = Digest::MD5.hexdigest(url)
-		if type == 'GET'
-			response = RestClient.get(url, params)
-			res_code = response.code
-		else 
-			response = RestClient.post(url, params)
-			res_code = response.code
-		end
+		res = RestClient::Request.execute(:method => type.to_sym, :url => url, :headers => {:params => params})
+		res_code = res.code
 		File.open(res_file,'a+'){ |file|
-			file << response.body
+			file << res.body
 		}
 		arr = [event, url, res_code, res_file]
 		WEB_REQUEST_REDIS.set(site_id, arr.inspect)
