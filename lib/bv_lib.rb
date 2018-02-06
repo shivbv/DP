@@ -1,8 +1,9 @@
 require 'csv'
 module BvLib
-	def self.parse_file(file_name)
+	def self.parse_file
+		filename = ENV['filename']
 		websites = []
-		File.open(file_name).each { |website|
+		File.open(filename).each { |website|
 			websites.push(website.strip)
 		}
 		websites

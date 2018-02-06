@@ -163,6 +163,7 @@ GEM
       resque
       sass-rails
       twitter-bootstrap-rails
+    rubysl-resolv (2.1.2)
     sass (3.5.5)
       sass-listen (~> 4.0.0)
     sass-listen (4.0.0)
@@ -239,6 +240,7 @@ DEPENDENCIES
   rake
   resque
   resque-web
+  rubysl-resolv
   sass-rails (~> 5.0)
   spring
   spring-watcher-listen (~> 2.0.0)
@@ -250,4 +252,4 @@ DEPENDENCIES
   whois
 
 BUNDLED WITH
-   1.16.0
+   1.16.1

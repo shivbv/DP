@@ -10,13 +10,34 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180110032528) do
+ActiveRecord::Schema.define(version: 20180206170723) do
 
   create_table "scrap_entities", force: :cascade do |t|
     t.string   "url"
     t.text     "params"
     t.integer  "category"
     t.integer  "status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "similar_web_infos", force: :cascade do |t|
+    t.integer  "site_id"
+    t.string   "url"
+    t.integer  "status"
+    t.string   "globalrank"
+    t.string   "traffic"
+    t.string   "category"
+    t.string   "topcategories"
+    t.string   "description"
+    t.string   "toptags"
+    t.datetime "created_at",    null: false
+    t.datetime "updated_at",    null: false
+    t.index ["site_id"], name: "index_similar_web_infos_on_site_id"
+  end
+
+  create_table "sites", force: :cascade do |t|
+    t.string   "url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
