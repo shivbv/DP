@@ -3,8 +3,8 @@ class Site < ApplicationRecord
 	def self.batch_create(urls)
 		update_array = []
 		urls_found = Site.where(:url => urls).collect { |site| site.url }
-		urls_notfound = urls - urls_found
-		urls_notfound.each { |url|
+		urls_not_found = urls - urls_found
+		urls_not_found.each { |url|
 			data = "('#{url}', '#{Time.now.getutc}', '#{Time.now.getutc}')" 
 			update_array << data
 		}
