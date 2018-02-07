@@ -1,7 +1,6 @@
 class Site < ApplicationRecord
 	has_one :similar_web_info
 	def self.batch_create(urls)
-		debugger
 		update_array = []
 		urls_found = Site.where(:url => urls).collect { |site| site.url }
 		urls_notfound = urls - urls_found
