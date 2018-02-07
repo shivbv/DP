@@ -1,3 +1,4 @@
+require 'csv'
 class Parser
 	def self.get_response(s_entity)
 		mechanize = Mechanize.new
@@ -5,32 +6,35 @@ class Parser
 	end
 
 	def self.similarweb()
-		file_name = ENV["filename"] || "/home/check.csv"
+		file_name = ENV["filename"] || "/home/sumit/result/sumilarweb.csv"
 		scrap_entities = ScrapEntity.executed.similarweb
-		keys = ['website', 'global_rank', 'estimated_traffic', 'category', 'topcategories', 'description', 'toptags']
-		values = []
-		scrap_entities.each { |s_entity|
-			begin
-				logger = s_entity.logger
-				res = get_response(s_entity)
-				data = JSON.parse(res.body)
-				global_rank = data["GlobalRank"]["Rank"]
-				estimatted_traffic = data["Engagments"]["Visits"]
-				title = data["Title"]
-				category = data["Category"]
-				topcategories = data["TopCategoriesAndFills"].collect { |category| category["Category"] }.join(", ")
-				toptags = data["TopTagsAndStrength"].collect { |tag| tag["Tag"] }.join(", ")
-				description = data["Description"]
-				values << [s_entity.params['website'], global_rank, estimatted_traffic, category, 
-					topcategories, description, toptags]
-				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
-				logger.info "PARSEDSUCCESSFULLY :"
-			rescue => e
-				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
-				logger.error "PARSINGFAILED : response is nil"
-			end
+		CSV.open(file_name, 'wb+') { |csv|
+			csv << ['website', 'global_rank', 'estimated_traffic', 'category', 'topcategories', 'description', 'toptags']
+			scrap_entities.each { |s_entity|
+				begin
+					logger = s_entity.logger
+					res = get_response(s_entity)
+					data = JSON.parse(res.body)
+					global_rank = data["GlobalRank"]["Rank"]
+					estimatted_traffic = data["Engagments"]["Visits"]
+					title = data["Title"]
+					category = data["Category"]
+					topcategories = data["TopCategoriesAndFills"].collect { |category| category["Category"] }.join(", ")
+					toptags = data["TopTagsAndStrength"].collect { |tag| tag["Tag"] }.join(", ")
+					description = data["Description"]
+					url = s_entity.url
+					url.gsub!("https://api.similarweb.com/v1/SimilarWebAddon/","")
+					csv << [url, global_rank, estimatted_traffic, category, 
+						topcategories, description, toptags]
+					s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
+					logger.info "PARSEDSUCCESSFULLY :"
+				rescue => e
+					csv << [s_entity.url, 'NOTFOUND']
+					s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
+					logger.error "PARSINGFAILED : response is nil"
+				end
+			}
 		}
-		BvLib.write_file(file_name, keys, values)
 	end
 
 	def self.trafficestimate()
@@ -61,7 +65,7 @@ class Parser
 
 
 	def self.scanbacklinks()
-		file_name = ENV["filename"] || "/home/sumit/da.csv"
+		file_name = ENV["filename"] || "/home/sumit/result/da.csv"
 		keys = ['url', 'website', 'DA', 'PA']
 		values = []
 		scrap_entities = ScrapEntity.executed.scanbacklinks
@@ -186,7 +190,7 @@ class Parser
 	end
 
 	def self.whois
-		file_name = ENV["filename"] || "/home/sumit/whoisinfo1.csv"
+		file_name = ENV["filename"] || "/home/sumit/result/whoisinfo4feb.csv"
 		keys = ['url', 'registrant_name', 'organization_name', 'registrant_state',
 						'registrant_country', 'registrant_email', 'admin_email']
 		values = []
@@ -284,7 +288,6 @@ class Parser
 		file_name = ENV["filename"] || "/home/check.csv"
 		keys = ["Plugin_name", "Plugin_link", "Plugin_rating", "Plugin_author", "Plugin_active_installs",
 			"Plugins_last_update"]
-			values = []
 			scrap_entities = ScrapEntity.executed.wpplugins
 			scrap_entities.each { |s_entity|
 				begin
@@ -309,7 +312,6 @@ class Parser
 						plugin_author = footer[0].text.strip
 						active_install = footer[1].text.strip
 						last_updated = footer[3].text.strip
-						values << [plugin_name, plugin_link, plugin_rating, plugin_author, active_install, last_updated]
 						s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
 						logger.info "PARSEDSUCCESSFULLY :"
 					end
@@ -318,7 +320,6 @@ class Parser
 					s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
 				end
 			}
-		BvLib.write_file(file_name, keys, values)
 	end
 
 	def self.whosip
@@ -368,10 +369,11 @@ class Parser
 	end
 
 	def self.advertcheck
-		file_name = ENV["filename"] || "/home/check.csv"
-		keys = ['website', 'dealpage_status', 'advertpage_status', 'couponpage_status']
-		values = []
+		file_name = ENV["filename"] || "/home/sumit/result/jayesh344.csv"
+		keys = ['dealpage_status', 'advertpage_status', 'couponpage_status', 'giveawaypage_status', 'podcastpage_status', 
+				'offerpage', 'discountpage']
 		scrap_entities = ScrapEntity.executed.advertcheck
+		CSV.open(file_name, 'wb+') { |csv|
 		scrap_entities.each { |s_entity|
 			begin
 				logger = s_entity.logger
@@ -380,10 +382,18 @@ class Parser
 					dealpage = ""
 					advertpage = ""
 					couponpage = ""
-					dealpage = link.href if link.href =~ /deals?/i
+					giveawaypage = ""
+					podcastpage = ""
+					offerpage = ""
+					discountpage = ""
+					dealpage = link.href if link.href =~ /deal/i
 					advertpage = link.href if link.href =~ /advert?/i
 					couponpage = link.href if link.href =~ /coupon/i
-					values << [s_entity.url, dealpage, advertpage, couponpage] if(couponpage != "" || advertpage != "" || dealpage != "")
+					giveawaypage = link.href if link.href =~ /giveaway/i
+					podcastpage = link.href if link.href =~ /podcast/i
+					offerpage = link.href if link.href =~ /offer/i
+					discountpage = link.href if link.href =~ /discount/i
+					csv << [s_entity.url, dealpage, advertpage, couponpage, giveawaypage, podcastpage , offerpage, discountpage] if (couponpage != "" || advertpage != "" || dealpage != "" || podcastpage != "" || giveawaypage != "" || offerpage != "" || discountpage != "")		
 				}
 				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
 				logger.info "PARSEDSUCCESSFULLY :"
@@ -392,11 +402,11 @@ class Parser
 				logger.error "PARSERFAILED : #{e.message}"
 			end
 		}
-		BvLib.write_file(file_name, keys, values)
+		}
 	end
 
 	def self.extractemail
-		file_name = ENV["filename"] || "/home/sumit/check15.csv"
+		file_name = ENV["filename"] || "/home/sumit/result/emailinfo4feb1.csv"
 		keys = ['website', 'email']
 		values = []
 		scrap_entities = ScrapEntity.executed.extractemail
@@ -407,7 +417,7 @@ class Parser
 				emails = res.body.scan(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/).flatten
 				if emails != []
 					emails.uniq!
-					emails.each { |email| values << [s_entity.url, email] } 
+					emails.each { |email| values << [s_entity.url, email] }
 				end
 				s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
 				logger.info "PARSEDSUCCESSFULLY :"
@@ -418,5 +428,48 @@ class Parser
 		}
 		BvLib.write_file(file_name, keys, values)
 	end
-
+	
+	def self.gravatar
+		file_name = ENV["filename"] || "/home/sumit/result/gravatar2.csv"
+		scrap_entities = ScrapEntity.gravatar
+		CSV.open(file_name, 'wb+') { |csv|
+			csv << ['website', 'name', 'location', 'phone_no', 'aboutme']
+			scrap_entities.each { |s_entity|
+				begin
+					logger = s_entity.logger
+					if (s_entity.status == ScrapEntity::Status::EXECUTIONFAILED)
+						csv << [s_entity.url, 'PROFILENOTFOUND']
+					elsif (s_entity.status == ScrapEntity::Status::EXECUTED)
+						res = get_response(s_entity)
+						data = JSON.parse(res.body)
+						entry = data['entry'][0]
+						if entry != nil
+							name = entry['displayName']
+							aboutme = entry['aboutMe']
+							location = entry['currentLocation']
+							phonenumbers = entry['phoneNumbers']
+							phonenumbers = phonenumbers.collect {|phonenumber| phonenumber['value'] } if phonenumbers != nil 
+							emails = entry['emails']
+							emails = emails.collect{|email| email['value'] } if emails != nil
+							accounts = entry['accounts']
+							accounts = accounts.collect {|account| account['url'] } if accounts != nil
+							websites = entry['urls']
+							websites = websites.collect{|website| website['value'] }
+							result =  [s_entity.url, name, location, phonenumbers, aboutme] 
+							emails.each {|email| result << email } if emails != nil
+							accounts.each {|account| result << account } if accounts != nil
+							websites.each {|website| website << website } if websites != nil
+							csv << result
+						end
+						s_entity.update_attributes!(:status => ScrapEntity::Status::PARSED)
+						logger.info "PARSEDSUCCESSFULLY :"
+					end
+				rescue => e
+					csv << [s_entity.url, 'PARSINGERROR']
+					s_entity.update_attributes!(:status => ScrapEntity::Status::PARSINGFAILED)
+					logger.error "PARSINGFAILED : #{e.message}"
+				end
+			}
+		}
+	end
 end
