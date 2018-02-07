@@ -1,6 +1,5 @@
 class SimilarWebInfo < ApplicationRecord
 	belongs_to :site
-
 	module Status
 		NOTEXECUTED = 0
 		EXECUTED = 1
