@@ -7,8 +7,9 @@ end
 
 gem 'resque'
 gem 'rest-client'
-gem 'whois'
 gem 'redis'
+gem 'rubysl-resolv'
+gem 'whois'
 gem 'resque-web'
 gem 'activerecord-import'
 gem 'rake'

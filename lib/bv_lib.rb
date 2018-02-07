@@ -1,12 +1,19 @@
+require 'csv'
 module BvLib
-	def self.parse_file(file_name)
-		file = File.open(file_name).read
+	def self.parse_urls_file(filename)
 		websites = []
-		file.each_line { |website|
+		File.open(filename).each { |website|
 			websites.push(website.strip)
 		}
-		websites
+		websites.uniq!
+	end
 
+	def self.write_file(task_id)
+		CSV.open(file_name, 'w+') do |csv|
+			csv << keys
+			values.each { |value|
+				csv << value
+			}
+		end
 	end
 end
-
