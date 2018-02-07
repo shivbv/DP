@@ -1,6 +1,6 @@
 require 'csv'
 module BvLib
-	def self.parse_file
+	def self.parse_urls_file
 		filename = ENV['filename']
 		websites = []
 		File.open(filename).each { |website|

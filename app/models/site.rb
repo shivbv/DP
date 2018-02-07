@@ -1,13 +1,13 @@
 class Site < ApplicationRecord
 	has_one :similar_web_info
-	def self.create_site(urls)
+	def self.batch_create(urls)
+		debugger
 		update_array = []
-		urls.each { |url|
-			site_id = Site.find_by(:url => url)
-			if site_id == nil 
-				data = "('#{url}', '#{Time.now.getutc}', '#{Time.now.getutc}')"
-				update_array << data
-			end
+		urls_found = Site.where(:url => urls).urls
+		urls_notfound = urls - urls_found
+		urls_notfound.each { |url|
+			data = "('#{url}', '#{Time.now.getutc}', '#{Time.now.getutc}')" 
+			update_array << data
 		}
 		while !update_array.empty?
 			ActiveRecord::Base.connection.execute("INSERT INTO sites (url, created_at, updated_at)
