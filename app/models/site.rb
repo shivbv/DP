@@ -3,7 +3,7 @@ class Site < ApplicationRecord
 	def self.batch_create(urls)
 		debugger
 		update_array = []
-		urls_found = Site.where(:url => urls).urls
+		urls_found = Site.where(:url => urls).collect { |site| site.url }
 		urls_notfound = urls - urls_found
 		urls_notfound.each { |url|
 			data = "('#{url}', '#{Time.now.getutc}', '#{Time.now.getutc}')" 

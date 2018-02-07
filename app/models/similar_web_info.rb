@@ -15,12 +15,13 @@ class SimilarWebInfo < ApplicationRecord
 
 	def self.batch_create(sites)
 		update_array = []	
-		sites_found = SimilarWebInfo.where(:site => sites).sites
-		sites_notfound = sites - sites_found
-		sites_notfound.each { |site|
-				data = "('#{site.id}', '#{Status::NOTEXECUTED}', '', '', '', '', '', 
-				'', '#{Time.now.getutc}', '#{Time.now.getutc}' )"
-				update_array << data
+		debugger
+		sites_found = SimilarWebInfo.where(:site => sites).collect { |swinfo| swinfo.site}
+		sites_not_found = sites - sites_found
+		sites_not_found.each { |site|
+			data = "('#{site.id}', '#{Status::NOTEXECUTED}', '', '', '', '', '', '', '#{Time.now.getutc}', 
+					'#{Time.now.getutc}' )"
+			update_array << data
 		}
 		while !update_array.empty?
 			ActiveRecord::Base.connection.execute("INSERT INTO similar_web_infos(site_id, status, 
