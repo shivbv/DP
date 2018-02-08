@@ -8,7 +8,7 @@ namespace :similar_web do
 		task = Task.create('SIMILARWEB', inputfile, outputfile, urls.length)
 		puts task.id
 		swinfos.each { |swinfo|
-			Resque.enque(WebRequestJob, 'GET', swinfo.url, {}, {'action' => 'SimilarWebResponseHandlerJob', 
+			Resque.enqueue(WebRequestJob, 'GET', swinfo.url, {}, {'action' => 'SimilarWebResponseHandlerJob', 
 					'task_id' => task.id, 'id' => swinfo.id })
 		}
 	end

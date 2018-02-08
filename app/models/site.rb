@@ -1,9 +1,11 @@
 class Site < ApplicationRecord
 	has_one :similar_web_info
+	has_one :scan_back_link_info
+	has_one :twitter_info
 	def self.batch_create(urls)
 		update_array = []
 		urls_found = Site.where(:url => urls).collect { |site| site.url }
-		urls_not_found = urls - urls_found
+		urls_not_found = urls - urls_found if urls && urls_found 
 		urls_not_found.each { |url|
 			data = "('#{url}', '#{Time.now.getutc}', '#{Time.now.getutc}')" 
 			update_array << data
