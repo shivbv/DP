@@ -8,8 +8,7 @@ namespace :scan_back_link do
 		task = Task.create('SCANBACKLINK', inputfile, outputfile, urls.length)
 		puts task.id
 		sbl_infos.each { |sbl_info|
-			Resque.enqueue(WebRequestJob, 'GET', sbl_info.url, {}, {'action' => 'ScanBackLinkResponseHandlerJob',
-					'task_id' => task.id, 'id' => sbl_info.id })
+			Resque.enqueue(ScanBackLinkResponseHandlerJob, task.id, sbl_info.id) 
 		}
 	end
 

@@ -12,12 +12,12 @@ class ScanBackLinkResponseHandlerJob
 		logger
 	end
 
-	def self.perform(task_id, sbl_info_id, response_code, response_file)
+	def self.perform(task_id, sbl_info_id)
 		logger = create_logger(sbl_info_id)
 		sbl_info = ScanBackLinkInfo.find(sbl_info_id)
+		response = sbl_info.get_response
 		task = Task.find(task_id)
-		if response_code == 200
-			debugger
+		if response.code == '200'
 			form = response.form_with(:action => '/check-dapa')
 			form.field_with(:id => 'checkform-site').value = sbl_info.site.url
 			form_response = form.submit

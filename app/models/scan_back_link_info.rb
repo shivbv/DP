@@ -13,6 +13,10 @@ class ScanBackLinkInfo < ApplicationRecord
 		'https://scanbacklinks.com/check-dapa'
 	end
 
+	def get_response
+		res ||= Mechanize.new.get(url)
+	end
+
 	def self.batch_create(sites)
 		update_array = []
 		sites_found = ScanBackLinkInfo.where(:site => sites).collect { |sbl_info| sbl_info.site}
