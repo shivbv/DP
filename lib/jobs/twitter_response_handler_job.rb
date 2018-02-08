@@ -13,7 +13,7 @@ class TwitterResponseHandlerJob
 	end
 
 	def self.parse(response)
-		if response != nil
+		if response
 			user_website  = response.css('.ProfileHeaderCard-url span a.u-textUserColor')[0] != nil ?
 					response.css('.ProfileHeaderCard-url span a.u-textUserColor')[0]['title'] : "not found"
 			user_location = response.css('.ProfileHeaderCard-location span')[1] != nil ?

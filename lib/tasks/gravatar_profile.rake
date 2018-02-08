@@ -2,7 +2,6 @@ namespace :gravatar_profile do
 	task :fetch => :environment do
 		inputfile = ENV['inputfile']
 		outputfile = ENV['outputfile']
-		debugger
 		urls = BvLib.parse_urls_file(inputfile) 
 		sites = Site.batch_create(urls)
 		gp_infos = GravatarProfileInfo.batch_create(sites)
@@ -23,7 +22,7 @@ namespace :gravatar_profile do
 		gp_infos = GravatarProfileInfo.where(:site => sites)
 		gp_infos.each { |gp_info|
 			puts [gp_info.name, gp_info.about_user, gp_info.location, gp_info.phone_numbers, gp_info.emails,
-				gp_info.social_accounts, gp_info.websites]
+					gp_info.social_accounts, gp_info.websites]
 		} 
 	end
 end

@@ -7,7 +7,7 @@ class Site < ApplicationRecord
 		update_array = []
 		urls_found = Site.where(:url => urls).collect { |site| site.url }
 		urls_not_found = urls - urls_found if urls && urls_found 
-		if urls_not_found != nil
+		if urls_not_found
 			urls_not_found.each { |url|
 				data = "('#{url}', '#{Time.now.getutc}', '#{Time.now.getutc}')" 
 				update_array << data

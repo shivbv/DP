@@ -13,7 +13,7 @@ class GravatarProfileResponseHandlerJob
 
 	def self.parse(data)
 		entry = data['entry'][0]
-		if entry != nil
+		if entry
 			name = entry['displayName']
 			about_user = entry['aboutMe']
 			location = entry['currentLocation']
@@ -33,7 +33,7 @@ class GravatarProfileResponseHandlerJob
 		logger = create_logger(gp_info_id)
 		gp_info = GravatarProfileInfo.find(gp_info_id)
 		task = Task.find(task_id)
-		if response_code == 200
+		if response_code == '200'
 			data = JSON.parse(File.read(response_file))
 			name, about_user, location, phone_numbers, emails, social_accounts, websites = parse(data)
 			gp_info.update_attributes!(:status => GravatarProfileInfo::Status::PARSED, :name => name, 
