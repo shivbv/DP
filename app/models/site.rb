@@ -3,6 +3,7 @@ class Site < ApplicationRecord
 	has_one :scan_back_link_info
 	has_one :twitter_info
 	has_one :gravatar_profile_info
+	has_one :rest_api_info
 	def self.batch_create(urls)
 		update_array = []
 		urls_found = Site.where(:url => urls).collect { |site| site.url }

@@ -15,7 +15,7 @@ class SimilarWebInfo < ApplicationRecord
 	def self.batch_create(sites)
 		update_array = []	
 		sites_found = SimilarWebInfo.where(:site => sites).collect { |swinfo| swinfo.site}
-		sites_not_found = sites - sites_found
+		sites_not_found = sites - sites_found if sites && sites_found
 		sites_not_found.each { |site|
 			data = "('#{site.id}', '#{Status::NOTEXECUTED}', '', '', '', '', '', '', '#{Time.now.getutc}', 
 					'#{Time.now.getutc}')"

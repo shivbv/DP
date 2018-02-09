@@ -6,7 +6,7 @@ namespace :similar_web do
 		sites = Site.batch_create(urls)
 		swinfos = SimilarWebInfo.batch_create(sites)
 		task = Task.create('SIMILARWEB', inputfile, outputfile, urls.length)
-		puts task.id
+		puts [task.id, 'SimilarWeb']
 		swinfos.each { |swinfo|
 			Resque.enqueue(WebRequestJob, 'GET', swinfo.url, {}, {'action' => 'SimilarWebResponseHandlerJob', 
 					'task_id' => task.id, 'id' => swinfo.id })
