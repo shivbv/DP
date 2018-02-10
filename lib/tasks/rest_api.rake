@@ -8,8 +8,13 @@ namespace :rest_api do
 		task = Task.create('RESTAPI', inputfile, outputfile, urls.length)
 		puts [task.id, 'RESTAPI']
 		ra_infos.each { |ra_info|
-			Resque.enqueue(WebRequestJob, 'GET', ra_info.url, {}, {'action' => 'RestApiResponseHandlerJob',
-					'task_id' => task.id, 'id' => ra_info.id })
+			pages = RestClient.get(ra_info.url).headers[:x_wp_totalpages]
+			if pages
+				for index in 1..pages.to_i
+					Resque.enqueue(WebRequestJob, 'GET', "#{ra_info.url}?page=#{index}", {}, {'action' => 
+							'RestApiResponseHandlerJob', 'task_id' => task.id, 'id' => ra_info.id })
+				end
+			end
 		}
 	end
 

@@ -7,7 +7,7 @@ class WebRequestJob
 		logger = Logger.new("#{Rails.root.to_s}/log/web_requests.log")
 		identifier = "XXXX #{url} ===="
 		logger.formatter = proc { |severity, datetime, progname, msg|
-						   	 "#{severity} #{datetime} #{identifier} #{msg}\n"
+								 "#{severity} #{datetime} #{identifier} #{msg}\n"
 		}
 		logger
 	end
@@ -23,6 +23,6 @@ class WebRequestJob
 		}
 		Resque.enqueue(event['action'].classify.constantize , event['task_id'], event['id'], res_code, res_file)
 	rescue => e
-	logger.error "REQUESTFAILED : #{e.message}"	
+		logger.error "REQUESTFAILED : #{e.message}"	
 	end
 end
