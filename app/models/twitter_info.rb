@@ -1,6 +1,6 @@
 class TwitterInfo < ApplicationRecord
 	belongs_to :site
-	
+
 	module Status
 		NOTEXECUTED = 0
 		EXECUTED = 1
@@ -12,7 +12,7 @@ class TwitterInfo < ApplicationRecord
 	def url
 		self.site.url
 	end
-	
+
 	def self.batch_create(sites)
 		update_array = []
 		sites_found = TwitterInfo.where(:site => sites).collect { |twitter_info| twitter_info.site}
@@ -24,7 +24,7 @@ class TwitterInfo < ApplicationRecord
 			}
 		end
 		while !update_array.empty?
-			ActiveRecord::Base.connection.execute("INSERT INTO twitter_infos(site_id, status, user_website, 
+			ActiveRecord::Base.connection.execute("INSERT INTO twitter_infos(site_id, status, user_website,
 					user_location, user_follower_count, created_at, updated_at) 
 					VALUES #{update_array.shift(4096).join(',')}")
 		end

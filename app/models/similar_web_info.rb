@@ -1,5 +1,6 @@
 class SimilarWebInfo < ApplicationRecord
 	belongs_to :site
+
 	module Status
 		NOTEXECUTED = 0
 		EXECUTED = 1
@@ -13,7 +14,7 @@ class SimilarWebInfo < ApplicationRecord
 	end
 
 	def self.batch_create(sites)
-		update_array = []	
+		update_array = []
 		sites_found = SimilarWebInfo.where(:site => sites).collect { |swinfo| swinfo.site}
 		sites_not_found = sites - sites_found if sites && sites_found
 		sites_not_found.each { |site|

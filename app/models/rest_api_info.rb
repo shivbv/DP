@@ -11,7 +11,7 @@ class RestApiInfo < ApplicationRecord
 	end
 
 	def url
-		"http://#{self.site.url}/wp-json/wp/v2/users"  
+		"http://#{self.site.url}/wp-json/wp/v2/users" 
 	end
 
 	def self.batch_create(sites)

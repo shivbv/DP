@@ -2,6 +2,7 @@ class GravatarProfileResponseHandlerJob
 	def self.queue
 		:responsehandler
 	end
+
 	def self.create_logger(gp_info_id)
 		logger = Logger.new("#{Rails.root.to_s}/log/gravatarprofileresponsehandler.log")
 		identifier = "XXXX #{gp_info_id} ===="
@@ -48,6 +49,5 @@ class GravatarProfileResponseHandlerJob
 		gp_info.update_attributes!(:status => GravatarProfileInfo::Status::PARSINGFAILED)
 		logger.error "PARSINGFAILED #{e.message}"
 	end
-
 end
 

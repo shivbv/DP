@@ -36,6 +36,4 @@ class WebHostingHeroResponseHandlerJob
 		whh_info.update_attributes!(:status => WebHostingHeroInfo::Status::PARSINGFAILED)
 		logger.error "PARSINGFAILED #{e.message}"
 	end
-
-
 end

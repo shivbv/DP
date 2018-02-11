@@ -5,6 +5,5 @@ class Task < ApplicationRecord
 		task.save
 		task
 	end
-
 end
 

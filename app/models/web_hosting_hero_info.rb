@@ -16,7 +16,7 @@ class WebHostingHeroInfo < ApplicationRecord
 	def get_response
 		res ||= Mechanize.new.get(url)
 	end
-	
+
 	def self.batch_create(sites)
 		update_array = []
 		sites_found = WebHostingHeroInfo.where(:site => sites).collect { |whh_info| whh_info.site}
@@ -33,5 +33,4 @@ class WebHostingHeroInfo < ApplicationRecord
 		end
 		WebHostingHeroInfo.where(:site => sites)
 	end
-
 end

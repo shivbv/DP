@@ -32,5 +32,4 @@ class RestApiResponseHandlerJob
 		ra_info.update_attributes!(:status => RestApiInfo::Status::PARSINGFAILED)
 		logger.error "PARSINGFAILED #{e.message}"
 	end
-
 end
