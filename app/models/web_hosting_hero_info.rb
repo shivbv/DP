@@ -23,12 +23,12 @@ class WebHostingHeroInfo < ApplicationRecord
 		sites_not_found = sites - sites_found if sites && sites_found
 		if sites_not_found
 			sites_not_found.each { |site|
-				data = "('#{site.id}', '#{Status::NOTEXECUTED}', '', '#{Time.now.getutc}', '#{Time.now.getutc}')"
+				data = "('#{site.id}', '#{Status::NOTEXECUTED}', '#{Time.now.getutc}', '#{Time.now.getutc}')"
 				update_array << data
 			}
 		end
 		while !update_array.empty?
-			ActiveRecord::Base.connection.execute("INSERT INTO web_hosting_hero_infos(site_id, status, webhost, 
+			ActiveRecord::Base.connection.execute("INSERT INTO web_hosting_hero_infos(site_id, status,
 					created_at, updated_at) VALUES #{update_array.shift(4096).join(',')}")
 		end
 		WebHostingHeroInfo.where(:site => sites)

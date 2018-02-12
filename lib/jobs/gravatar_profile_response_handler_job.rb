@@ -50,4 +50,3 @@ class GravatarProfileResponseHandlerJob
 		logger.error "PARSINGFAILED #{e.message}"
 	end
 end
-
