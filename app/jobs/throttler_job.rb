@@ -32,4 +32,20 @@ class ThrottlerJob < ApplicationJob
 			sleep(20)
 		end
 	end
+
+	def perform_article_details()
+		while $article_queue.length != 0
+			count = 0
+			while count < 5
+				temp_array = $article_queue.pop
+				article_info = temp_array[0]
+				task_id = temp_array[1]
+				Resque.enqueue(WebRequestJob, 'GET', article_info.url, {}, {'action' => 'ArticleResponseHandlerJob',
+																													  'task_id' => task_id, 'id' => article_info.id })
+				count += 1
+				puts count
+			end
+			#sleep(10)
+		end
+	end
 end
