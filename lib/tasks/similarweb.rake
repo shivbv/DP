@@ -8,9 +8,9 @@ namespace :similar_web do
 		task = Task.create('SIMILARWEB', inputfile, outputfile, urls.length)
 		puts [task.id, 'SimilarWeb']
 		swinfos.each { |swinfo|
-			Resque.enqueue(WebRequestJob, 'GET', swinfo.url, {}, {'action' => 'SimilarWebResponseHandlerJob', 
-					'task_id' => task.id, 'id' => swinfo.id })
+	    $sw_queue << [swinfo,task.id]
 		}
+		ThrottlerJob.new.perform_sw()
 	end
 
 	task :output => :environment do

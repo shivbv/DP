@@ -6,11 +6,11 @@ namespace :twitter do
 		sites = Site.batch_create(urls)
 		twitter_infos = TwitterInfo.batch_create(sites)
 		task = Task.create('TWITTER', inputfile, outputfile, urls.length)
-		puts task.id
+		puts task_id = task.id
 		twitter_infos.each { |twitter_info|
-			Resque.enqueue(WebRequestJob, 'GET', twitter_info.url, {}, {'action' => 'TwitterResponseHandler',
-					'task_id' => task.id, 'id' => twitter_info.id })
+			$twitter_queue << [twitter_info,task.id]
 		}
+		ThrottlerJob.new.perform_twitter()
 	end
 
 	task :output => :environment do

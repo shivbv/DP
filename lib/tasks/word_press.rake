@@ -6,10 +6,10 @@ namespace :word_press do
 		sites = Site.batch_create(urls)
 		wp_infos = WordPressInfo.batch_create(sites)
 		task = Task.create('WORDPRESS', inputfile, outputfile, urls.length)
+		task_id = task.id
 		puts [task.id, 'WordPress']
 		wp_infos.each { |wp_info|
-			Resque.enqueue(WebRequestJob, 'GET', wp_info.url, {}, {'action' => 'WordPressResponseHandlerJob',
-					'task_id' => task.id, 'id' => wp_info.id })
+			$wp_info_queue << [wp_info,task.id]
 		}
 	end
 
