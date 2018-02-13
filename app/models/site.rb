@@ -5,6 +5,7 @@ class Site < ApplicationRecord
 	has_one :gravatar_profile_info
 	has_one :rest_api_info
 	has_one :word_press_info
+	has_one :advertisment_info
 	def self.batch_create(urls)
 		update_array = []
 		urls_found = Site.where(:url => urls).collect { |site| site.url }
@@ -22,4 +23,3 @@ class Site < ApplicationRecord
 		Site.where(:url => urls)
 	end
 end
-
