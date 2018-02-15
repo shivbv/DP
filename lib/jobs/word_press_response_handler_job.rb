@@ -18,7 +18,7 @@ class WordPressResponseHandlerJob
 		task = Task.find(task_id)
 		if response_code == 200
 			mechanize = Mechanize.new
-			response = mechanize.get("file://#{response_file}")
+			response = mechanize.get("file:///#{Rails.root.to_s}/#{response_file}")
 			check = 'no'
 			check = 'yes' if response && response.body =~ /wp-content/ || response.body =~ /wp-uploads/
 			wp_info.update_attributes!(:status => WordPressInfo::Status::PARSED, :check => check)
