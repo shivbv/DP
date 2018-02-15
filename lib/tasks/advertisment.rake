@@ -21,8 +21,10 @@ namespace :advertisment do
 		sites = Site.where(:url => urls)
 		ads_infos = AdvertismentInfo.where(:site => sites)
 		ads_infos.each { |ads_info|
+			puts "****#{ads_info.url} *******"
 			ads_info.website.each { |link|
-			puts [link.url, link.type]
+			puts [link.url, link.category]
+		}
 		}
 	end
 end

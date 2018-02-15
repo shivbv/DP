@@ -1,7 +1,7 @@
 class Website < ApplicationRecord
   belongs_to :advertisment_info
 	
-	module Type
+	module Category
 		ADVERT = 0
 		COUPON = 1
 		DEAL = 2
@@ -11,9 +11,8 @@ class Website < ApplicationRecord
 		DISCOUNT = 6
 	end
 
-	def self.create(ads_info_id, url, type)
-		debugger
-		Website.new(:advertisment_info_id => ads_info_id, :url => url, :type => type).save
+	def self.create(ads_info_id, url, category)
+		Website.new(:advertisment_info_id => ads_info_id, :url => url, :category => category).save
 	end	
 
 end

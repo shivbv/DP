@@ -15,11 +15,11 @@ class TwitterResponseHandlerJob
 	def self.parse(response)
 		if response
 			user_website  = response.css('.ProfileHeaderCard-url span a.u-textUserColor')[0] != nil ?
-					response.css('.ProfileHeaderCard-url span a.u-textUserColor')[0]['title'] : "not found"
+				response.css('.ProfileHeaderCard-url span a.u-textUserColor')[0]['title'] : "not found"
 			user_location = response.css('.ProfileHeaderCard-location span')[1] != nil ?
-					response.css('.ProfileHeaderCard-location span')[1].text.strip : "Not Found"
+				response.css('.ProfileHeaderCard-location span')[1].text.strip : "Not Found"
 			user_follower_count = response.search('span.ProfileNav-value')[2] != nil ?
-					response.search('span.ProfileNav-value')[2].text : "Not Found"
+				response.search('span.ProfileNav-value')[2].text : "Not Found"
 		end
 		return user_website, user_location, user_follower_count
 	end
@@ -30,7 +30,7 @@ class TwitterResponseHandlerJob
 		task = Task.find(task_id)
 		if response_code == 200
 			mechanize = Mechanize.new
-			response = mechanize.get("file:///#{response_file}")
+			response = mechanize.get("file:///#{Rails.root.to_s}/#{response_file}")
 			user_website, user_location, user_follower_count = parse(response)
 			twitter_info.update_attributes!(:status => TwitterInfo::Status::PARSED, :user_website => user_website,
 					:user_location => user_location, :user_follower_count => user_follower_count)

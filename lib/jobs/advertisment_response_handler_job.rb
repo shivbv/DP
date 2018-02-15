@@ -15,16 +15,15 @@ class AdvertismentResponseHandlerJob
 
 	def self.parse(links, ads_info)
 		links.each { |link|
-			type = -1
-			type = Website::Type::DEAL if link.href =~ /deal/i
-			type = Website::Type::ADVERT if link.href =~ /advert/i
-			type = Website::Type::COUPON if link.href =~ /coupon/i
-			type = Website::Type::Giveaway if link.href =~ /giveaway/i
-			type = Website::Type::PODCAST if link.href =~ /podcast/i
-			type = Website::Type::OFFER if link.href =~ /offer/i
-			type = Website::Type::DISCOUNT if link.href =~ /discount/i	
-			debugger
-			Website.create(ads_info.id, link.href, type) if type != -1
+			category = -1
+			category = Website::Category::DEAL if link.href =~ /deal/i
+			category = Website::Category::ADVERT if link.href =~ /advert/i
+			category = Website::Category::COUPON if link.href =~ /coupon/i
+			category = Website::Category::Giveaway if link.href =~ /giveaway/i
+			category = Website::Category::PODCAST if link.href =~ /podcast/i
+			category = Website::Category::OFFER if link.href =~ /offer/i
+			category = Website::Category::DISCOUNT if link.href =~ /discount/i	
+			Website.create(ads_info.id, link.href, category) if category != -1
 		}
 	end
 
@@ -34,8 +33,7 @@ class AdvertismentResponseHandlerJob
 		task = Task.find(task_id)
 		if response_code == 200
 			mechanize = Mechanize.new
-			response = mechanize.get("file://#{response_file}")
-			debugger
+			response = mechanize.get("file:///#{Rails.root.to_s}/#{response_file}")
 			parse(response.links, ads_info)
 			ads_info.update_attributes!(:status => AdvertismentInfo::Status::EXECUTIONFAILED)
 		else
