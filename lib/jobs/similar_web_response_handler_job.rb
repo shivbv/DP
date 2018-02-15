@@ -7,7 +7,7 @@ class SimilarWebResponseHandlerJob
 		logger = Logger.new("#{Rails.root.to_s}/log/similarwebresponsehandler.log")
 		identifier = "XXXX #{swinfo_id} ===="
 		logger.formatter = proc { |severity, datetime, progname, msg|
-				"#{severity} #{datetime} #{identifier} #{msg}\n"
+			"#{severity} #{datetime} #{identifier} #{msg}\n"
 		}
 		logger
 	end

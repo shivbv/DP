@@ -6,14 +6,6 @@ module BvLib
 			websites.push(website.strip)
 		}
 		websites.uniq!
-	end
-
-	def self.write_file(task_id)
-		CSV.open(file_name, 'w+') do |csv|
-			csv << keys
-			values.each { |value|
-				csv << value
-			}
-		end
+		websites
 	end
 end
