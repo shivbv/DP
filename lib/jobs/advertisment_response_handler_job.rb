@@ -19,7 +19,7 @@ class AdvertismentResponseHandlerJob
 			category = Website::Category::DEAL if link.href =~ /deal/i
 			category = Website::Category::ADVERT if link.href =~ /advert/i
 			category = Website::Category::COUPON if link.href =~ /coupon/i
-			category = Website::Category::Giveaway if link.href =~ /giveaway/i
+			category = Website::Category::GIVEAWAY if link.href =~ /giveaway/i
 			category = Website::Category::PODCAST if link.href =~ /podcast/i
 			category = Website::Category::OFFER if link.href =~ /offer/i
 			category = Website::Category::DISCOUNT if link.href =~ /discount/i	
