@@ -6,16 +6,19 @@ namespace :rest_api do
 		sites = Site.batch_create(urls)
 		ra_infos = RestApiInfo.batch_create(sites)
 		task = Task.create('RESTAPI', inputfile, outputfile, urls.length)
-		puts [task.id, 'RESTAPI']
+		task_id = task.id
+		puts [task_id, 'RESTAPI']
 		ra_infos.each { |ra_info|
 			pages = RestClient.get(ra_info.url).headers[:x_wp_totalpages]
 			if pages
 				for index in 1..pages.to_i
-					Resque.enqueue(WebRequestJob, 'GET', "#{ra_info.url}?page=#{index}", {}, {'action' => 
-							'RestApiResponseHandlerJob', 'task_id' => task.id, 'id' => ra_info.id })
+					key = "#{task_id}_#{ra_info.id}"
+					QUEUE_NO_RATE_LIMIT.set(key, ['GET', "#{ra_info.url}?page=#{index}", {},
+																			{:action => 'RestApiResponseHandlerJob', :task_id=> task_id, :id => ra_info.id }].to_json)	
 				end
 			end
 		}
+		ThrottlerJob.new.perform
 	end
 
 	task :output => :environment do

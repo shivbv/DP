@@ -6,11 +6,14 @@ namespace :advertisment do
 		sites = Site.batch_create(urls)
 		ads_infos = AdvertismentInfo.batch_create(sites)
 		task = Task.create('ADVERTISMENT', inputfile, outputfile, urls.length)
+		task_id = task.id
 		puts [task.id, 'Advertisment']
 		ads_infos.each { |ads_info|
-			Resque.enqueue(WebRequestJob, 'GET', ads_info.url, {}, {'action' => 'AdvertismentResponseHandlerJob', 
-					'task_id' => task.id, 'id' => ads_info.id })
+			key = "#{task_id}_#{ads_info.id}"
+			QUEUE_NO_RATE_LIMIT.set(key, ['GET', ads_info.url, {},
+													 {:action => 'AdvertismentResponseHandlerJob', :task_id=> task_id, :id => ads_info.id }].to_json)
 		}
+		ThrottlerJob.new.perform	
 	end
 
 	task :output => :environment do

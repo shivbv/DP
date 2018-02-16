@@ -9,8 +9,11 @@ namespace :word_press do
 		task_id = task.id
 		puts [task.id, 'WordPress']
 		wp_infos.each { |wp_info|
-			$wp_info_queue << [wp_info,task.id]
+			key = "#{task_id}_#{wp_info.id}"
+			QUEUE_NO_RATE_LIMIT.set(key, ['GET', wp_info.url, {},
+													 {:action => 'WordPressResponseHandlerJob', :task_id=> task_id, :id => wp_info.id }].to_json)
 		}
+		ThrottlerJob.new.perform
 	end
 
 	task :output => :environment do
