@@ -6,6 +6,8 @@ class Site < ApplicationRecord
 	has_one :rest_api_info
 	has_one :word_press_info
 	has_one :advertisment_info
+	has_one :website_info
+	has_one :whois_info
 	def self.batch_create(urls)
 		update_array = []
 		urls_found = Site.where(:url => urls).collect { |site| site.url }
