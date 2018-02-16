@@ -30,7 +30,7 @@ class SimilarWebResponseHandlerJob
 		task = Task.find(task_id)
 		if response_code == 200
 			data = JSON.parse(File.read(response_file))
-			global_rank, traffic, category, topcategories, toptags, description = parse(data)
+			puts global_rank, traffic, category, topcategories, toptags, description = parse(data)
 			swinfo.update_attributes!(:status => SimilarWebInfo::Status::PARSED, :global_rank => global_rank, 
 					:traffic => traffic, :category => category, :topcategories => topcategories, 
 					:description => description, :toptags => toptags)

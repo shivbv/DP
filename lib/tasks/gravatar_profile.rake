@@ -6,11 +6,14 @@ namespace :gravatar_profile do
 		sites = Site.batch_create(urls)
 		gp_infos = GravatarProfileInfo.batch_create(sites)
 		task = Task.create('GRAVATAR', inputfile, outputfile, urls.length)
-		puts task.id
+		task_id = task.id
+		puts [task_id,'GRAVATAR']
 		gp_infos.each { |gp_info|
-			Resque.enqueue(WebRequestJob, 'GET', gp_info.url, {}, {'action' => 'GravatarProfileResponseHandlerJob', 
-					'task_id' => task.id, 'id' => gp_info.id })
+			key = "#{task_id}_#{gp_info.id}"
+			QUEUE_NO_RATE_LIMIT.set(key, ['GET', gp_info.url, {},
+															{:action => 'GravatarProfileResponseHandlerJob', :task_id=> task_id, :id => gp_info.id }].to_json)
 		}
+		ThrottlerJob.new.perform
 	end
 
 	task :output => :environment do
