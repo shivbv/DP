@@ -10,7 +10,7 @@ class GravatarProfileInfo < ApplicationRecord
 	end
 
 	def url
-		"#{self.site.url}/.json"
+		"#{self.site.url}.json"
 	end
 
 	def self.batch_create(sites)
